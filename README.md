@@ -1,2 +1,3 @@
-# Client
-Client Application Code (e.g. Hello-World Prototype to be commit/push for Project 1)
+# SwoleMate Client Program
+## Before Running
+If `npx expo start` fails to work, make sure to run `npm install` first
