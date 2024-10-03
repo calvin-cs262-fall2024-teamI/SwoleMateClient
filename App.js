@@ -3,6 +3,7 @@ import { View, Text, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileCreator from './components/ProfileCreator'; // Import the ProfileCreator component
+import WelcomeScreen from './components/WelcomeScreen';
 
 function HomeScreen({ navigation }) {
   return (
@@ -21,8 +22,9 @@ const Stack = createNativeStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Welcome">
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="ProfileCreator" component={ProfileCreator} />
       </Stack.Navigator>
     </NavigationContainer>
