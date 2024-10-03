@@ -23,9 +23,19 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="ProfileCreator" component={ProfileCreator} />
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+        />
+        <Stack.Screen 
+          name="Welcome" 
+          component={WelcomeScreen} 
+          options={{ headerShown: false }} // Hide the header for WelcomeScreen
+        />
+        <Stack.Screen 
+          name="ProfileCreator" 
+          component={ProfileCreator} 
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
