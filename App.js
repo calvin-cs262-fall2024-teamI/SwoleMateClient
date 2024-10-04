@@ -37,10 +37,7 @@ function App() {
           name="ProfileCreator" 
           component={ProfileCreator} 
         />
-        <Stack.Screen 
-          name="MatchScreen" 
-          component={MatchScreen} 
-        />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -104,7 +104,7 @@
             setPasswordValid(isPasswordValid);
 
             if (isEmailValid && isPasswordValid) {
-                navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
+                //navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
             } else {
                 console.log("Fill the textboxes");
             }
