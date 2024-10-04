@@ -104,10 +104,9 @@ function WelcomeScreen({ navigation }) {
     setPasswordValid(isPasswordValid);
 
     if (isEmailValid && isPasswordValid) {
-      // Uncomment to navigate to the home screen
-      // navigation.navigate('homescreen'); 
+        navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
     } else {
-      console.log("Fill the textboxes");
+        console.log("Fill the textboxes");
     }
   };
 
