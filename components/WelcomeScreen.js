@@ -18,7 +18,6 @@
         import React, { useState, useEffect, useRef } from 'react';
         import { View, Text, Button, TextInput, Image, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
         import AppIntroSlider from 'react-native-app-intro-slider';
-        import MatchScreen from './MatchScreen';
         /**
         * Renders a single slide for the introduction slider.
         *
