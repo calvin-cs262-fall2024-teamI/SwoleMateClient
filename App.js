@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileCreator from './components/ProfileCreator'; // Import the ProfileCreator component
 import WelcomeScreen from './components/WelcomeScreen';
+import MatchScreen from './components/MatchScreen';
 
 function HomeScreen({ navigation }) {
   return (
@@ -35,6 +36,10 @@ function App() {
         <Stack.Screen 
           name="ProfileCreator" 
           component={ProfileCreator} 
+        />
+        <Stack.Screen 
+          name="MatchScreen" 
+          component={MatchScreen} 
         />
       </Stack.Navigator>
     </NavigationContainer>

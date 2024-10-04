@@ -41,7 +41,7 @@ function MatchScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('../assets/swole.png')}
+      source={require('../assets/icon.png')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -49,7 +49,7 @@ function MatchScreen({ navigation }) {
         <Text style={styles.title}>Match Screen</Text>
     
         {/* List of nearby users */}
-        <FlatList
+        <FlatList                   
           data={nearbyUsers}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
