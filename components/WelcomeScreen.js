@@ -1,82 +1,240 @@
-  import React, { useState } from 'react';
+        /**
+         * WelcomeScreen Component
+         * 
+         * This component serves as the initial screen of the SwoleMates application. 
+         * It features a background slider showcasing images related to fitness, 
+         * along with input fields for user registration and sign-in. 
+         * It provides immediate visual feedback on the validity of user inputs.
+         * 
+         * @component
+         * @param {object} navigation - The navigation object provided by React Navigation, 
+         * allowing navigation between screens.
+         * 
+         * @example
+         * // Usage within a Navigator
+         * <Stack.Screen name="Welcome" component={WelcomeScreen} />
+         */
 
-  import { View, Text, Button, TextInput, Image, TouchableWithoutFeedback, Keyboard } from 'react-native';
-  import AppIntroSlider from 'react-native-app-intro-slider';
-  function WelcomeScreen({ navigation }) {
-
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-
-    return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'blue' }}>
-          <Text style={{ fontSize: 24, color: 'white' }}>Welcome to SwoleMates</Text>
-          <Text style={{ fontSize: 15, color: 'white' }}>Find your perfect Gym Partner</Text>
-          <View style={{ justifyContent: 'center', width: '80%', margin: 50 }}>
-            <TextInput
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              style={styles.input}  
-            />
-            <TextInput
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-            />
-            <View style={styles.buttonContainer}>
-              <Button
-                title="SIGN IN"
-                onPress={() => console.log('Go to sign in page')}
-              />
+        import React, { useState, useEffect, useRef } from 'react';
+        import { View, Text, Button, TextInput, Image, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
+        import AppIntroSlider from 'react-native-app-intro-slider';
+        /**
+        * Renders a single slide for the introduction slider.
+        *
+        * @param {object} item - The slide data including text and image.
+        * @returns {JSX.Element} The rendered slide.
+        */
+        const RenderSlide = ({ item }) => {
+          return (
+            <View style={styles.slideContainer}>
+              <Image source={item.image} style={styles.image} />
+              <View style={styles.overlay} />
+              <Text style={styles.text}>{item.text}</Text>
             </View>
-            <View style={styles.buttonContainer}>
-              <Button
-                title="REGISTER"
-                onPress={checkTextBox(email,password)? ()=>console.log(" fill the textboxes"):() => navigation.navigate('ProfileCreator')    }
-              />
-            </View>
-          </View>
+          );
+        };
 
-        </View>
-      </TouchableWithoutFeedback>
-    );  
-  }
+        function WelcomeScreen({ navigation }) {
+          // State variables to manage email and password input
+          const [email, setEmail] = useState('');
+          const [password, setPassword] = useState('');
+          const [emailValid, setEmailValid] = useState(true);
+          const [passwordValid, setPasswordValid] = useState(true);
 
-  function checkTextBox (email,password){
-      if(email===""||password===""){
-        return true;
-      }
+          // Reference for the AppIntroSlider
+          const sliderRef = useRef(null);
 
-  }
+          // Slide data for the AppIntroSlider
+          const slides = [
+            {
+              key: 'slide1',
+              text: 'This is the first slide',
+              image: require('../assets/gym_background.jpg'),
+            },
+            {
+              key: 'slide2',
+              text: 'This is the second slide',
+              image: require('../assets/two_people_working_out.jpg'),
+            },
+            {
+              key: 'slide3',
+              text: 'This is the third slide',
+              image: require('../assets/couple_working.jpg'),
+            },
+          ];
 
-  const styles = {
-    input: {
-      height: 40,
-      color: 'white',
-      borderWidth: 1,
-      marginBottom: 20,
-      borderColor: 'black',
+          // Effect to cycle through slides every 5 seconds
+          useEffect(() => {
+            let currentIndex = 0; // Start with the first slide
+            const interval = setInterval(() => {
+              currentIndex = (currentIndex + 1) % slides.length; // Move to the next slide
+              sliderRef.current.goToSlide(currentIndex, true); // Change slide with animation
+            }, 5000); 
 
-      paddingHorizontal: 10,
-    },
-    buttonContainer: {
+            // Cleanup interval on unmount. when the component unmounts or before the effect runs again. 
+            //This is important to prevent memory leaks or unwanted behavior when the component is no longer in the DOM.
+            return () => clearInterval(interval);
 
-      borderColor: 'black',
-      borderWidth: 1,
-      // Ensure the button spans the full width
-      marginTop: 10,        // Add margin to create space between the picker and the button
-    },
-  }
+            //The empty dependency array [] at the end of the useEffect hook indicates that this effect only runs once when the component mounts. 
+            //Since there are no dependencies, it does not re-run when the component re-renders.
+          }, []);
 
+          // Handler for the REGISTER button
+          const handleRegister = () => {
+            const isEmailValid = email !== ""; // Check if email is not empty
+            const isPasswordValid = password !== ""; // Check if password is not empty
 
+            setEmailValid(isEmailValid); // Update email validity state
+            setPasswordValid(isPasswordValid); // Update password validity state
 
+            if (isEmailValid && isPasswordValid) {
+              navigation.navigate('ProfileCreator'); // Navigate if both fields are valid
+            } else {
+              console.log("Fill the textboxes"); // Log message if inputs are invalid
+            }
+          };
 
+          // Handler for the SIGN IN button
+          const handleSignin = () => {
+            const isEmailValid = email !== "";
+            const isPasswordValid = password !== "";
 
+            setEmailValid(isEmailValid);
+            setPasswordValid(isPasswordValid);
 
-  export default WelcomeScreen;
+            if (isEmailValid && isPasswordValid) {
+                //navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
+            } else {
+                console.log("Fill the textboxes");
+            }
+          };
 
+          return (
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+              <View style={{ flex: 1 }}>
+                {/* Background Slider */}
+                <AppIntroSlider
+                  ref={sliderRef}
+                  data={slides}
+                  renderItem={RenderSlide}
+                  showNextButton={false}
+                  showDoneButton={false}
+                />
 
+                {/* Overlay Form */}
+                <View style={styles.formContainer}>
+                  <Image
+                    source={require('../assets/SmallerLogo.png')}
+                    style={{ width: 70, height: 70, marginBottom: 30, borderRadius: 10 }}
+                  />
+                  <Text style={styles.title}>Welcome to SwoleMates</Text>
 
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder="Email"
+                      value={email}
+                      onChangeText={setEmail}
+                      style={[styles.input, !emailValid && styles.invalidInput]} // Change border color if invalid
+                    />
+                    <TextInput
+                      placeholder="Password"
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry
+                      style={[styles.input, !passwordValid && styles.invalidInput]} // Change border color if invalid
+                    />
+                  </View>
+
+                  <View style={styles.buttonContainer}>
+                    <Button
+                      title="SIGN IN"
+                      onPress={handleSignin} // Call handleSignin on press
+                    />
+                  </View>
+
+                  <View style={styles.buttonContainer}>
+                    <Button
+                      title="REGISTER"
+                      onPress={handleRegister} // Call handleRegister on press
+                    />
+                  </View>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          );
+        }
+
+        // Define styles for the component
+        const styles = StyleSheet.create({
+          formContainer: {
+            position: 'absolute',   // Overlay on top of slider
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '5%',
+          },
+          title: {
+            fontSize: 24,
+            color: 'white',
+            marginBottom: '10%',
+            zIndex: 1,
+          },
+          inputContainer: {
+            width: '80%',
+          },
+          input: {
+            height: 40,
+            backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent input background
+            borderRadius: 5,
+            marginBottom: '8%',
+            paddingHorizontal: 10,
+            borderColor: 'blue', // Default border color
+            borderWidth: 2, // Default border width
+          },
+          invalidInput: {
+            borderColor: 'red', // Border color when input is invalid
+          },
+          buttonContainer: {
+            width: '60%',
+            color: 'black',
+            marginTop: '3%',
+            padding: '1%',
+            borderRadius: 5,
+            backgroundColor: 'blue'
+          },
+          slideContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'white',
+          },
+          image: {
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            resizeMode: 'cover', // Ensure the image covers the entire background
+          },
+          text: {
+            position: 'absolute',
+            bottom: '55%',
+            color: 'white', // Use a contrasting color for better readability
+            fontSize: 16,
+            textAlign: 'center',
+            zIndex: 1, // Ensure text appears above the overlay
+          },
+          overlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black overlay
+          },
+        });                   
+
+        export default WelcomeScreen;
