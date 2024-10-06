@@ -125,7 +125,7 @@
                 <View style={styles.formContainer}>
                   <Image
                     source={require('../assets/SmallerLogo.png')}
-                    style={{ width: 70, height: 70, marginBottom: 30, borderRadius: 10 }}
+                    style={{ width: 85, height: 85, marginBottom: 30, borderRadius: 10 }}
                   />
                   <Text style={styles.title}>Welcome to SwoleMates</Text>
 
