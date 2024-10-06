@@ -1,6 +1,5 @@
-// ProfileCreator.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback, Button, Image } from 'react-native'; // Added Image here
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback, Button, Image } from 'react-native';
 import { styles } from './PC_Style'; // Importing the styles
 
 function ProfileCreator({ navigation }) {
@@ -154,7 +153,11 @@ function ProfileCreator({ navigation }) {
           </Modal>
 
           <View style={styles.buttonContainer}>
-            <Button title="Save Profile" onPress={() => console.log('Profile Saved!')} color="white" />
+            <Button
+              title="Save Profile"
+              onPress={() => navigation.navigate('HubScreen')} // Navigate to HubScreen on press
+              color="white"
+            />
           </View>
         </View>
       </ScrollView>
