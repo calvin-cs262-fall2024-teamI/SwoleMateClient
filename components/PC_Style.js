@@ -10,6 +10,22 @@ export const styles = StyleSheet.create({
   inputContainer: {
     width: '80%',
   },
+
+  selectProfileImageBox: { // added a style for Select Profile Image box
+    padding: '2%',
+    borderColor: 'blue',
+    borderWidth: 2,
+    borderRadius: 5,
+    alignSelf: 'absolute',
+    right: '-14%', // Adjusted to be relative to the container
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  selectprofileText: { // added a style for select profile image text (similar to pickerText style)
+    color: 'black',
+    textAlign: 'center',
+    fontSize: 15,
+  },
+
   input: {
     height: 40,
     backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent input background
@@ -100,4 +116,13 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     color: 'black',  // Changed to black
   },
+  profileImage: { // added a style to display profile image
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    position: 'absolute',
+    top: '-10%', // Adjusted to be relative to the container
+    right: '20%', // Adjusted to be relative to the container
+  },
 });
+

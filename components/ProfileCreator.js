@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback, Button, Image } from 'react-native';
 import { styles } from './PC_Style'; // Importing the styles
+import * as ImagePicker from 'expo-image-picker';
 
 function ProfileCreator({ navigation }) {
   const [firstName, setFirstName] = useState('');
@@ -13,6 +14,7 @@ function ProfileCreator({ navigation }) {
   const [workoutType, setWorkoutType] = useState('cardio');
   const [activePicker, setActivePicker] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleOutsidePress = () => {
     setActivePicker(null); // Close any open picker when clicking outside
@@ -26,6 +28,19 @@ function ProfileCreator({ navigation }) {
   const closeModal = () => {
     setModalVisible(false);
     setActivePicker(null);
+  };
+
+  const handlePickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    } else {
+      alert('You did not select any image.');
+    }
   };
 
   const handleSelection = (itemValue, pickerType) => {
@@ -47,6 +62,10 @@ function ProfileCreator({ navigation }) {
           />
           <Text style={styles.title}>Create Your Profile</Text>
         </View>
+
+        <TouchableOpacity style={[styles.selectProfileImage]} onPress={handlePickImageAsync}>
+          <Text style={[styles.selectprofileText, styles.selectProfileImageBox]}>Select Profile Image</Text>
+        </TouchableOpacity>
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
@@ -93,6 +112,13 @@ function ProfileCreator({ navigation }) {
               style={styles.input}
             />
           </View>
+
+          {profileImage && (
+            <Image
+              source={{ uri: profileImage }}
+              style={styles.profileImage}
+            />
+          )}
 
           <Text style={styles.pickerLabel}>Preferred Time to Workout:</Text>
           <TouchableOpacity
