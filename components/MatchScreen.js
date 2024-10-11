@@ -89,9 +89,9 @@ function MatchScreen({ navigation }) {
 
         {/* Bottom navigation buttons */}
         <View style={styles.navButtonContainer}>
-          <Button title="Home" onPress={() => navigation.navigate('Home')} />
-          <Button title="Profile" onPress={() => navigation.navigate('Profile')} />
-          <Button title="Matches" onPress={() => navigation.navigate('Matches')} />
+          <Button title="Home" onPress={() => navigation.navigate()} />
+          <Button title="Profile" onPress={() => navigation.navigate()} />
+          <Button title="Matches" onPress={() => navigation.navigate()} />
         </View>
       </View>
     </ImageBackground>
