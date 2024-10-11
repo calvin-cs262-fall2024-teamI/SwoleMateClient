@@ -3,7 +3,8 @@ import { View, Text, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileCreator from './components/ProfileCreator'; // Import the ProfileCreator component
-import WelcomeScreen from './components/WelcomeScreen';
+import WelcomeScreen from './components/WelcomeScreen'; // Import the WelcomeScreen component
+import MatchScreen from './components/MatchScreen'; // Import the MatchScreen component
 
 function HomeScreen({ navigation }) {
   return (
@@ -36,9 +37,15 @@ function App() {
           name="ProfileCreator" 
           component={ProfileCreator} 
         />
+        <Stack.Screen 
+          name="MatchScreen" // Add MatchScreen to the stack
+          component={MatchScreen} 
+          options={{ headerShown: false }} // Hide the header for MatchScreen if desired
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
 export default App;
+
