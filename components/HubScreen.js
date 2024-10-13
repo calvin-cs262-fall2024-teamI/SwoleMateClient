@@ -1,12 +1,12 @@
 // HubScreen.js
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, Image, StyleSheet } from 'react-native';
+import { styles as profileStyles } from './PC_Style'; // Importing the styles from ProfileCreatorStyles.js
 
 const HubScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Welcome to the Hub Screen!</Text>
-      
       {/* Button to navigate to the MatchScreen */}
       <View style={styles.buttonContainer}>
         <Button
@@ -19,6 +19,7 @@ const HubScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  ...profileStyles, // Use the imported styles and add your own custom styles below
   container: {
     flex: 1,
     justifyContent: 'center',

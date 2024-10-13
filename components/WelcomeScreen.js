@@ -48,17 +48,17 @@
           const slides = [
             {
               key: 'slide1',
-              text: 'This is the first slide',
+              text: 'Meet a new gym partner',
               image: require('../assets/gym_background.jpg'),
             },
             {
               key: 'slide2',
-              text: 'This is the second slide',
+              text: 'Get fit together',
               image: require('../assets/two_people_working_out.jpg'),
             },
             {
               key: 'slide3',
-              text: 'This is the third slide',
+              text: 'Make a new friend',
               image: require('../assets/couple_working.jpg'),
             },
           ];
