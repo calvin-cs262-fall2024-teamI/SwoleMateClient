@@ -88,11 +88,13 @@ function MatchScreen({ navigation }) {
         />
 
         {/* Bottom navigation buttons */}
+
         {/* <View style={styles.navButtonContainer}>
           <Button title="Home" onPress={() => navigation.navigate('Hub')} />
           <Button title="Profile" onPress={() => navigation.navigate('Profile')} />
           <Button title="Matches" onPress={() => navigation.navigate('Matches')} />
         </View> */}
+
       </View>
     </ImageBackground>
   );

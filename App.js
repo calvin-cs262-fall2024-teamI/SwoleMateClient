@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileCreator from './components/ProfileCreator'; 
 import WelcomeScreen from './components/WelcomeScreen'; 
 import HubScreen from './components/HubScreen'; 
+import MatchScreen from './components/MatchScreen';
 
 // HomeScreen component
 function HomeScreen({ navigation }) {
@@ -46,11 +47,18 @@ function App() {
           options={{ title: 'Create Profile' }}
         />
 
-        {/* Hub Screen (new screen after saving the profile) */}
+        {/* Hub Screen */}
         <Stack.Screen 
           name="HubScreen" 
           component={HubScreen} 
           options={{ title: 'Hub' }} // Title for the Hub Screen
+        />
+
+        {/* Match Screen */}
+        <Stack.Screen 
+          name="MatchScreen" 
+          component={MatchScreen} 
+          options={{ title: 'Match' }} // Title for the Match Screen
         />
         
       </Stack.Navigator>
