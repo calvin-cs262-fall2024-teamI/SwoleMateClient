@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
-
+import { View, Text, Button, FlatList, StyleSheet, ImageBackground, TouchableOpacity, Image } from 'react-native';
 
 function MatchScreen({ navigation }) {
-  // Sample matches to display on the screen - will make these iterative/changeable once the profile is fully done.
   const [nearbyUsers, setNearbyUsers] = useState([
     { id: '1', name: 'John Doe', age: 25, height: '6 ft', weight: '180 lbs' },
     { id: '2', name: 'Jane Doe', age: 28, height: '5 ft 6 in', weight: '150 lbs' },
@@ -16,15 +14,6 @@ function MatchScreen({ navigation }) {
     { id: '9', name: 'Jennifer Lawrence', age: 23, height: '5 ft 9 in', weight: '138 lbs' },
     { id: '10', name: 'Patrick Mahomes', age: 31, height: '6 ft 2 in', weight: '225 lbs' },
     { id: '11', name: 'Taylor Swift', age: 20, height: '5 ft 11 in', weight: '119 lbs' },
-    { id: '12', name: 'Sean John Combs', age: 27, height: '5 ft 10 in', weight: '190 lbs' },
-    { id: '13', name: 'Ariana Grande', age: 25, height: '5 ft 0 in', weight: '104 lbs' },
-    { id: '14', name: 'Christopher Clark', age: 28, height: '6 ft 1 in', weight: '185 lbs' },
-    { id: '15', name: 'Samantha Lewis', age: 22, height: '5 ft 2 in', weight: '120 lbs' },
-    { id: '16', name: 'William Walker', age: 26, height: '6 ft 3 in', weight: '210 lbs' },
-    { id: '17', name: 'Emily Hall', age: 24, height: '5 ft 5 in', weight: '145 lbs' },
-    { id: '18', name: 'Joshua Young', age: 29, height: '5 ft 8 in', weight: '165 lbs' },
-    { id: '19', name: 'Isabella King', age: 23, height: '5 ft 4 in', weight: '130 lbs' },
-    { id: '20', name: 'Matthew Scott', age: 30, height: '6 ft', weight: '195 lbs' },
   ]);
 
   const handleMatch = (userId) => {
@@ -46,8 +35,6 @@ function MatchScreen({ navigation }) {
       resizeMode="cover"
     >
       <View style={styles.container}>
-        <Text style={styles.title}>Match Screen</Text>
-    
         {/* List of nearby users */}
         <FlatList
           data={nearbyUsers}
@@ -59,10 +46,14 @@ function MatchScreen({ navigation }) {
                 item.matched && styles.matchedUserCard, // Apply green background if matched
               ]}
             >
-              <Text style={styles.userName}>{item.name}</Text>
-              <Text>Age: {item.age}</Text>
-              <Text>Height: {item.height}</Text>
-              <Text>Weight: {item.weight}</Text>
+              <Image source={require('../assets/SmallerLogo.png')} style={styles.profileImage} />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>{item.name}</Text>
+                <Text>Age: {item.age}</Text>
+                <Text>Height: {item.height}</Text>
+                <Text>Weight: {item.weight}</Text>
+              </View>
+
               <View style={styles.buttonGroup}>
                 {item.matched ? (
                   <TouchableOpacity style={styles.messageButton}>
@@ -86,20 +77,11 @@ function MatchScreen({ navigation }) {
             </View>
           )}
         />
-
-        {/* Bottom navigation buttons */}
-
-        {/* <View style={styles.navButtonContainer}>
-          <Button title="Home" onPress={() => navigation.navigate('Hub')} />
-          <Button title="Profile" onPress={() => navigation.navigate('Profile')} />
-          <Button title="Matches" onPress={() => navigation.navigate('Matches')} />
-        </View> */}
-
       </View>
     </ImageBackground>
   );
 }
-  
+
 // The stylesheet for the MatchScreen portion of the app.
 const styles = StyleSheet.create({
   background: {
@@ -109,21 +91,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Slightly transparent white
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Slightly transparent white background for consistency
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: 'green',
+    color: 'black',
   },
   userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 15,
     marginVertical: 10,
-    borderColor: 'gray',
-    borderWidth: 1,
+    borderColor: 'blue',
+    borderWidth: 2,
     borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
   matchedUserCard: {
     backgroundColor: 'rgba(144, 238, 144, 0.6)', // Light transparent green
@@ -131,7 +116,12 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'blue',
+    color: 'black',
+    marginBottom: 5,
+  },
+  userInfo: {
+    flex: 1,
+    paddingLeft: 10,
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -140,32 +130,29 @@ const styles = StyleSheet.create({
   },
   matchButton: {
     backgroundColor: 'green',
-    padding: 5,
+    padding: 10,
     borderRadius: 5,
-    width: '48%',                // Use flex instead of width for consistency
-    marginRight: 5,         // Space between Match and Ignore buttons
+    marginRight: 5, // Space between Match and Ignore buttons
   },
   ignoreButton: {
     backgroundColor: 'red',
-    padding: 5,
+    padding: 10,
     borderRadius: 5,
-    width: '48%',                // Use flex instead of width for consistency
   },
   messageButton: {
     backgroundColor: 'blue',
-    padding: 5,
+    padding: 10,
     borderRadius: 5,
-    width: '48%',
-    // marginTop: 10, 
   },
   buttonText: {
     color: 'white',
     textAlign: 'center',
   },
-  navButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
   },
 });
 
