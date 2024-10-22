@@ -56,9 +56,13 @@ function MatchScreen({ navigation }) {
 
               <View style={styles.buttonGroup}>
                 {item.matched ? (
-                  <TouchableOpacity style={styles.messageButton}>
-                    <Text style={styles.buttonText}>Message</Text>
-                  </TouchableOpacity>
+                  <TouchableOpacity
+                  style={styles.messageButton}
+                  onPress={() => navigation.navigate('Messenger', { userName: item.name })} // Pass the user's name
+                >
+                  <Text style={styles.buttonText}>Message</Text>
+                </TouchableOpacity>
+                
                 ) : (
                   <TouchableOpacity
                     style={styles.matchButton}

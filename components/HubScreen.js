@@ -25,7 +25,7 @@ const HubScreen = ({ navigation }) => {
         {/* Social Buttons Section */}
         <View style={styles.socialSection}>
           {/* Messenger Button (placeholder) */}
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Messenger', { userName: 'Select Contact' })}>
             <Text style={styles.buttonText}>Messenger</Text>
           </TouchableOpacity>
 

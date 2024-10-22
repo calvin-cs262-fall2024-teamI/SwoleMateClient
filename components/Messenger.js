@@ -7,9 +7,10 @@ import {
   SafeAreaView,
   TextInput,
   TouchableOpacity,
+  ScrollView,
   Platform,
+  KeyboardAvoidingView
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const contacts = [
   { id: "1", name: "Alice" },
@@ -53,14 +54,6 @@ const initialMessages = [
   },
 ];
 
-const ContactItem = ({ name }) => (
-  <View style={styles.contactItem}>
-    <View style={styles.avatar}>
-      <Text style={styles.avatarText}>{name[0].toUpperCase()}</Text>
-    </View>
-  </View>
-);
-
 const MessageItem = ({ message }) => (
   <View
     style={[
@@ -74,10 +67,10 @@ const MessageItem = ({ message }) => (
   </View>
 );
 
-const ChatScreen = () => {
+const Messenger = ({ route }) => {
+  const { userName } = route.params; // Retrieve the passed userName
   const [messages, setMessages] = useState(initialMessages);
   const [inputText, setInputText] = useState("");
-  const [currentContact, setCurrentContact] = useState(contacts[0]);
   const scrollViewRef = useRef(null);
 
   const sendMessage = () => {
@@ -92,36 +85,29 @@ const ChatScreen = () => {
 
     setMessages([...messages, newMessage]);
     setInputText("");
-    scrollViewRef.current?.scrollToEnd(true);
+    scrollViewRef.current?.scrollToEnd({ animated: true });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.contactList}>
-        <FlatList
-          data={contacts}
-          renderItem={({ item }) => <ContactItem name={item.name} />}
-          keyExtractor={item => item.id}
-        />
-      </View>
-      <View style={styles.chatArea}>
-        <View style={styles.chatHeader}>
-          <Text style={styles.chatHeaderText}>{currentContact.name}</Text>
-        </View>
-        <KeyboardAwareScrollView
+
+      {/* KeyboardAvoidingView handles keyboard events */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={90} // Adjust this value based on header size
+      >
+        <ScrollView
           style={styles.messageList}
           contentContainerStyle={styles.messageListContent}
           ref={scrollViewRef}
-          scrollEventThrottle={400}
-          enableOnAndroid={true}
-          enableAutomaticScroll={true}
-          keyboardOpeningTime={0}
-          extraHeight={Platform.select({ android: 100 })}
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         >
           {messages.map(message => (
             <MessageItem key={message.id} message={message} />
           ))}
-        </KeyboardAwareScrollView>
+        </ScrollView>
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -133,7 +119,7 @@ const ChatScreen = () => {
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -141,44 +127,16 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "row",
-  },
-  contactList: {
-    width: 60,
-    borderRightWidth: 1,
-    borderRightColor: "#ccc",
-  },
-  contactItem: {
-    alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#007AFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  chatArea: {
-    flex: 1,
-  },
-  chatHeader: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    alignItems: "center",
+    backgroundColor: "white",
   },
   chatHeaderText: {
     fontSize: 18,
     fontWeight: "bold",
+    textAlign: "center",
+    padding: 15,
+    backgroundColor: "#f5f5f5",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
   messageList: {
     flex: 1,
@@ -217,6 +175,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: "#ccc",
+    backgroundColor: "#f5f5f5",
   },
   input: {
     flex: 1,
@@ -240,4 +199,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatScreen;
+export default Messenger;
