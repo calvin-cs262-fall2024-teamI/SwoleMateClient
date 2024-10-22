@@ -12,6 +12,7 @@ function ProfileCreator({ navigation }) {
   const [weight, setWeight] = useState('');
   const [preferredTime, setPreferredTime] = useState('morning');
   const [workoutType, setWorkoutType] = useState('cardio');
+  const [experienceLevel, setExperienceLevel] = useState('Beginner'); // New state for Experience Level
   const [activePicker, setActivePicker] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
@@ -48,6 +49,8 @@ function ProfileCreator({ navigation }) {
       setPreferredTime(itemValue);
     } else if (pickerType === 'workoutType') {
       setWorkoutType(itemValue);
+    } else if (pickerType === 'experienceLevel') { // Handle Experience Level
+      setExperienceLevel(itemValue);
     }
     closeModal();
   };
@@ -136,6 +139,14 @@ function ProfileCreator({ navigation }) {
             <Text style={styles.pickerText}>{workoutType.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}</Text>
           </TouchableOpacity>
 
+          <Text style={styles.pickerLabel}>Experience Level:</Text>
+          <TouchableOpacity
+            style={styles.pickerContainer}
+            onPress={() => openModal('experienceLevel')}
+          >
+            <Text style={styles.pickerText}>{experienceLevel}</Text>
+          </TouchableOpacity>
+
           <Modal transparent={true} visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
             <TouchableWithoutFeedback onPress={closeModal}>
               <View style={styles.modalBackground}>
@@ -167,6 +178,22 @@ function ProfileCreator({ navigation }) {
                         >
                           <Text>{item.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}</Text>
                           {workoutType === item && <Text> ✔</Text>}
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+
+                  {activePicker === 'experienceLevel' && ( // Modal for Experience Level
+                    <View>
+                      <Text style={styles.modalTitle}>Experience Level:</Text>
+                      {['Beginner', 'Intermediate', 'Advanced', 'Elite'].map((item) => (
+                        <TouchableOpacity
+                          key={item}
+                          onPress={() => handleSelection(item, 'experienceLevel')}
+                          style={styles.modalOption}
+                        >
+                          <Text>{item}</Text>
+                          {experienceLevel === item && <Text> ✔</Text>}
                         </TouchableOpacity>
                       ))}
                     </View>
