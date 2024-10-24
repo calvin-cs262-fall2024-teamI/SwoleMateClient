@@ -18,6 +18,7 @@ interface User {
   height: string;
   weight: string;
   matched?: boolean;
+  pending?: boolean;
 }
 
 function MatchScreen() {
@@ -30,6 +31,7 @@ function MatchScreen() {
       age: 28,
       height: "5 ft 6 in",
       weight: "150 lbs",
+      pending: false
     },
     {
       id: "3",
@@ -37,6 +39,7 @@ function MatchScreen() {
       age: 22,
       height: "5 ft 7 in",
       weight: "137 lbs",
+      pending: false
     },
     {
       id: "4",
@@ -44,6 +47,7 @@ function MatchScreen() {
       age: 27,
       height: "5 ft 7 in",
       weight: "201 lbs",
+      pending: false
     },
     {
       id: "5",
@@ -51,6 +55,7 @@ function MatchScreen() {
       age: 24,
       height: "5 ft 5 in",
       weight: "120 lbs",
+      pending: false
     },
     {
       id: "6",
@@ -58,6 +63,7 @@ function MatchScreen() {
       age: 30,
       height: "6 ft 0 in",
       weight: "203 lbs",
+      pending: false
     },
     {
       id: "7",
@@ -162,10 +168,12 @@ function MatchScreen() {
   const handleMatch = (userId: string) => {
     setNearbyUsers((prevUsers) =>
       prevUsers.map((user) =>
-        user.id === userId ? { ...user, matched: true } : user
+        user.id === userId
+          ? { ...user, matched: true, pending: true } // Set both matched and pending to true
+          : user
       )
     );
-  };
+  };  
 
   const handleIgnore = (userId: string) => {
     setNearbyUsers((prevUsers) =>
@@ -206,18 +214,20 @@ function MatchScreen() {
                 </View>
 
                 <View style={styles.buttonGroup}>
-                  {item.matched ? (
-                    <TouchableOpacity style={styles.messageButton}>
-                      <Text style={styles.buttonText}>Message</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.matchButton}
-                      onPress={() => handleMatch(item.id)}
-                    >
-                      <Text style={styles.buttonText}>Match</Text>
-                    </TouchableOpacity>
-                  )}
+                {item.matched ? (
+                  <TouchableOpacity style={styles.pendingButton}>
+                    <Text style={styles.buttonText}>
+                      {item.pending ? "Pending" : "Message"} {/* Show "Pending" if pending is true */}
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.matchButton}
+                    onPress={() => handleMatch(item.id)}
+                  >
+                    <Text style={styles.buttonText}>Match</Text>
+                  </TouchableOpacity>
+                )}
                   <TouchableOpacity
                     style={styles.ignoreButton}
                     onPress={() => handleIgnore(item.id)}
@@ -263,7 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
   matchedUserCard: {
-    backgroundColor: "rgba(144, 238, 144, 0.6)", // Light transparent green
+    backgroundColor: "rgba(255, 165, 0, 0.6)", // Light transparent orange
   },
   userName: {
     fontSize: 18,
@@ -296,6 +306,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
+  pendingButton: {
+    backgroundColor: "orange",
+    padding: 10,
+    borderRadius: 5,
+  },  
   buttonText: {
     color: "white",
     textAlign: "center",
