@@ -16,6 +16,10 @@ import {
 import { StyleSheet } from "react-native";
 
 function ProfileCreator() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [verifyPassword, setVerifyPassword] = useState("");
+  const [passwordMatch, setPasswordMatch] = useState(true); // State to check password match
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [age, setAge] = useState("");
@@ -24,6 +28,8 @@ function ProfileCreator() {
   const [weight, setWeight] = useState("");
   const [preferredTime, setPreferredTime] = useState("morning");
   const [workoutType, setWorkoutType] = useState("cardio");
+  const [experienceLevel, setExperienceLevel] = useState("beginner");
+  const [personalBio, setPersonalBio] = useState(""); // New Personal Bio state
   const [activePicker, setActivePicker] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -62,8 +68,16 @@ function ProfileCreator() {
       setPreferredTime(itemValue);
     } else if (pickerType === "workoutType") {
       setWorkoutType(itemValue);
+    } else if (pickerType === "experienceLevel") {
+      setExperienceLevel(itemValue);
     }
     closeModal();
+  };
+
+  // Check if passwords match whenever verifyPassword changes
+  const checkPasswordMatch = (value: string) => {
+    setVerifyPassword(value);
+    setPasswordMatch(password === value);
   };
 
   return (
@@ -88,18 +102,53 @@ function ProfileCreator() {
 
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
+              <Text style={styles.label}>Username</Text>
+              <TextInput
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Verify Password</Text>
+              <TextInput
+                placeholder="Verify Password"
+                value={verifyPassword}
+                onChangeText={checkPasswordMatch}
+                secureTextEntry
+                style={[
+                  styles.input,
+                  !passwordMatch && styles.invalidInput, // Style change if passwords don't match
+                ]}
+              />
+              {!passwordMatch && (
+                <Text style={styles.errorText}>Passwords do not match</Text>
+              )}
+
+              <Text style={styles.label}>First Name</Text>
               <TextInput
                 placeholder="First Name"
                 value={firstName}
                 onChangeText={setFirstName}
                 style={styles.input}
               />
+              <Text style={styles.label}>Last Name</Text>
               <TextInput
                 placeholder="Last Name"
                 value={lastName}
                 onChangeText={setLastName}
                 style={styles.input}
               />
+              <Text style={styles.label}>Age</Text>
               <TextInput
                 placeholder="Age"
                 value={age}
@@ -107,28 +156,39 @@ function ProfileCreator() {
                 keyboardType="numeric"
                 style={styles.input}
               />
+              <Text style={styles.label}>Height (Feet/Inches)</Text>
               <View style={styles.heightContainer}>
                 <TextInput
-                  placeholder="Height (ft)"
+                  placeholder="Feet"
                   value={heightFt}
                   onChangeText={setHeightFt}
                   keyboardType="numeric"
                   style={styles.heightInput}
                 />
                 <TextInput
-                  placeholder="Height (in)"
+                  placeholder="Inches"
                   value={heightIn}
                   onChangeText={setHeightIn}
                   keyboardType="numeric"
                   style={styles.heightInput}
                 />
               </View>
+              <Text style={styles.label}>Weight (lbs)</Text>
               <TextInput
                 placeholder="Weight (lbs)"
                 value={weight}
                 onChangeText={setWeight}
                 keyboardType="numeric"
                 style={styles.input}
+              />
+              <Text style={styles.label}>Personal Bio</Text>
+              <TextInput
+                placeholder="Write something about yourself..."
+                value={personalBio}
+                onChangeText={setPersonalBio}
+                style={styles.bioInput}
+                multiline
+                numberOfLines={4}
               />
             </View>
 
@@ -158,6 +218,17 @@ function ProfileCreator() {
                 {workoutType
                   .replace(/-/g, " ")
                   .replace(/\b\w/g, (char) => char.toUpperCase())}
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.pickerLabel}>Experience Level:</Text>
+            <TouchableOpacity
+              style={styles.pickerContainer}
+              onPress={() => openModal("experienceLevel")}
+            >
+              <Text style={styles.pickerText}>
+                {experienceLevel.charAt(0).toUpperCase() +
+                  experienceLevel.slice(1)}
               </Text>
             </TouchableOpacity>
 
@@ -221,6 +292,28 @@ function ProfileCreator() {
                       </View>
                     )}
 
+                    {activePicker === "experienceLevel" && (
+                      <View>
+                        <Text style={styles.modalTitle}>Experience Level:</Text>
+                        {["beginner", "intermediate", "advanced", "expert"].map(
+                          (item) => (
+                            <TouchableOpacity
+                              key={item}
+                              onPress={() =>
+                                handleSelection(item, "experienceLevel")
+                              }
+                              style={styles.modalOption}
+                            >
+                              <Text>
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
+                              </Text>
+                              {experienceLevel === item && <Text> ✔</Text>}
+                            </TouchableOpacity>
+                          )
+                        )}
+                      </View>
+                    )}
+
                     <Button title="Close" onPress={closeModal} />
                   </View>
                 </View>
@@ -241,8 +334,6 @@ function ProfileCreator() {
   );
 }
 
-// styles/ProfileCreatorStyles.js
-
 export const styles = StyleSheet.create({
   formContainer: {
     justifyContent: "center",
@@ -252,32 +343,51 @@ export const styles = StyleSheet.create({
   inputContainer: {
     width: "80%",
   },
-
   selectProfileImageBox: {
-    // added a style for Select Profile Image box
     padding: "2%",
     borderColor: "blue",
     borderWidth: 2,
     borderRadius: 5,
     alignSelf: "flex-start",
-    right: "-14%", // Adjusted to be relative to the container
+    right: "-14%",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   selectprofileText: {
-    // added a style for select profile image text (similar to pickerText style)
     color: "black",
     textAlign: "center",
     fontSize: 15,
   },
-
+  label: {
+    fontSize: 14,
+    color: "black",
+    marginBottom: 5,
+  },
   input: {
     height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent input background
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 5,
     marginBottom: "8%",
     paddingHorizontal: 10,
     borderColor: "blue",
     borderWidth: 2,
+  },
+  invalidInput: {
+    borderColor: "red", // Border color when input is invalid
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  bioInput: {
+    height: 100,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    borderColor: "blue",
+    borderWidth: 2,
+    textAlignVertical: "top",
   },
   heightContainer: {
     flexDirection: "row",
@@ -286,7 +396,7 @@ export const styles = StyleSheet.create({
   },
   heightInput: {
     height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Same style as other inputs
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 5,
     width: "48%",
     paddingHorizontal: 10,
@@ -295,7 +405,7 @@ export const styles = StyleSheet.create({
   },
   pickerLabel: {
     width: "80%",
-    color: "black", // Changed to black
+    color: "black",
     fontSize: 16,
     marginBottom: 5,
   },
@@ -358,16 +468,15 @@ export const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    color: "black", // Changed to black
+    color: "black",
   },
   profileImage: {
-    // added a style to display profile image
     width: 60,
     height: 60,
     borderRadius: 10,
     position: "absolute",
-    top: "-10%", // Adjusted to be relative to the container
-    right: "20%", // Adjusted to be relative to the container
+    top: "-10%",
+    right: "20%",
   },
 });
 
