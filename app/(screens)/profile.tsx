@@ -8,8 +8,11 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function Profile() {
+  const router = useRouter();
+
   const userProfile = {
     firstName: "John",
     lastName: "Doe",
@@ -50,10 +53,16 @@ export default function Profile() {
 
           {/* Buttons positioned outside of the profile box */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("../editProfile")}
+            >
               <Text style={styles.buttonText}>Edit Profile</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("../editAccountDetails")}
+            >
               <Text style={styles.buttonText}>Edit Account Details</Text>
             </TouchableOpacity>
           </View>
