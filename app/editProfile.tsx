@@ -15,21 +15,17 @@ import {
 } from "react-native";
 import { StyleSheet } from "react-native";
 
-function ProfileCreator() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [verifyPassword, setVerifyPassword] = useState("");
-  const [passwordMatch, setPasswordMatch] = useState(true); // State to check password match
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [age, setAge] = useState("");
-  const [heightFt, setHeightFt] = useState("");
-  const [heightIn, setHeightIn] = useState("");
-  const [weight, setWeight] = useState("");
+function EditProfile() {
+  const [firstName, setFirstName] = useState("John");
+  const [lastName, setLastName] = useState("Doe");
+  const [age, setAge] = useState("25");
+  const [heightFt, setHeightFt] = useState("6");
+  const [heightIn, setHeightIn] = useState("2");
+  const [weight, setWeight] = useState("180");
   const [preferredTime, setPreferredTime] = useState("morning");
   const [workoutType, setWorkoutType] = useState("cardio");
   const [experienceLevel, setExperienceLevel] = useState("beginner");
-  const [personalBio, setPersonalBio] = useState(""); // New Personal Bio state
+  const [personalBio, setPersonalBio] = useState("Fitness enthusiast and gym lover.");
   const [activePicker, setActivePicker] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -37,7 +33,7 @@ function ProfileCreator() {
   const router = useRouter();
 
   const handleOutsidePress = () => {
-    setActivePicker(null); // Close any open picker when clicking outside
+    setActivePicker(null);
   };
 
   const openModal = (pickerType: any) => {
@@ -74,12 +70,6 @@ function ProfileCreator() {
     closeModal();
   };
 
-  // Check if passwords match whenever verifyPassword changes
-  const checkPasswordMatch = (value: string) => {
-    setVerifyPassword(value);
-    setPasswordMatch(password === value);
-  };
-
   return (
     <SafeAreaView style={{ backgroundColor: "white" }}>
       <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
@@ -89,7 +79,7 @@ function ProfileCreator() {
               source={require("@/assets/SmallerLogo.png")}
               style={styles.logo}
             />
-            <Text style={styles.title}>Create Your Profile</Text>
+            <Text style={styles.title}>Edit Your Profile</Text>
           </View>
 
           <TouchableOpacity onPress={handlePickImageAsync}>
@@ -102,38 +92,6 @@ function ProfileCreator() {
 
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Username</Text>
-              <TextInput
-                placeholder="Username"
-                value={username}
-                onChangeText={setUsername}
-                style={styles.input}
-              />
-
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.input}
-              />
-
-              <Text style={styles.label}>Verify Password</Text>
-              <TextInput
-                placeholder="Verify Password"
-                value={verifyPassword}
-                onChangeText={checkPasswordMatch}
-                secureTextEntry
-                style={[
-                  styles.input,
-                  !passwordMatch && styles.invalidInput, // Style change if passwords don't match
-                ]}
-              />
-              {!passwordMatch && (
-                <Text style={styles.errorText}>Passwords do not match</Text>
-              )}
-
               <Text style={styles.label}>First Name</Text>
               <TextInput
                 placeholder="First Name"
@@ -335,149 +293,150 @@ function ProfileCreator() {
 }
 
 export const styles = StyleSheet.create({
-  formContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "5%",
-  },
-  inputContainer: {
-    width: "80%",
-  },
-  selectProfileImageBox: {
-    padding: "2%",
-    borderColor: "blue",
-    borderWidth: 2,
-    borderRadius: 5,
-    alignSelf: "flex-start",
-    right: "-14%",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-  },
-  selectprofileText: {
-    color: "black",
-    textAlign: "center",
-    fontSize: 15,
-  },
-  label: {
-    fontSize: 14,
-    color: "black",
-    marginBottom: 5,
-  },
-  input: {
-    height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 5,
-    marginBottom: "8%",
-    paddingHorizontal: 10,
-    borderColor: "blue",
-    borderWidth: 2,
-  },
-  invalidInput: {
-    borderColor: "red", // Border color when input is invalid
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginBottom: 10,
-  },
-  bioInput: {
-    height: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    borderColor: "blue",
-    borderWidth: 2,
-    textAlignVertical: "top",
-  },
-  heightContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  heightInput: {
-    height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 5,
-    width: "48%",
-    paddingHorizontal: 10,
-    borderColor: "blue",
-    borderWidth: 2,
-  },
-  pickerLabel: {
-    width: "80%",
-    color: "black",
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  pickerContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 20,
-    width: "80%",
-    borderColor: "blue",
-    borderWidth: 2,
-  },
-  pickerText: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "black",
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  modalOption: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    width: "100%",
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-  },
-  buttonContainer: {
-    backgroundColor: "blue",
-    padding: 10,
-    width: "60%",
-    borderRadius: 5,
-    marginTop: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    borderRadius: 10,
-  },
-  title: {
-    fontSize: 24,
-    color: "black",
-  },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    position: "absolute",
-    top: "-10%",
-    right: "20%",
-  },
-});
-
-export default ProfileCreator;
+    formContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "5%",
+    },
+    inputContainer: {
+      width: "80%",
+    },
+    selectProfileImageBox: {
+      padding: "2%",
+      borderColor: "blue",
+      borderWidth: 2,
+      borderRadius: 5,
+      alignSelf: "flex-start",
+      right: "-14%",
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+    },
+    selectprofileText: {
+      color: "black",
+      textAlign: "center",
+      fontSize: 15,
+    },
+    label: {
+      fontSize: 14,
+      color: "black",
+      marginBottom: 5,
+    },
+    input: {
+      height: 40,
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      borderRadius: 5,
+      marginBottom: "8%",
+      paddingHorizontal: 10,
+      borderColor: "blue",
+      borderWidth: 2,
+    },
+    invalidInput: {
+      borderColor: "red", // Border color when input is invalid
+    },
+    errorText: {
+      color: "red",
+      fontSize: 12,
+      marginBottom: 10,
+    },
+    bioInput: {
+      height: 100,
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      paddingTop: 10,
+      borderColor: "blue",
+      borderWidth: 2,
+      textAlignVertical: "top",
+    },
+    heightContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 20,
+    },
+    heightInput: {
+      height: 40,
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      borderRadius: 5,
+      width: "48%",
+      paddingHorizontal: 10,
+      borderColor: "blue",
+      borderWidth: 2,
+    },
+    pickerLabel: {
+      width: "80%",
+      color: "black",
+      fontSize: 16,
+      marginBottom: 5,
+    },
+    pickerContainer: {
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 20,
+      width: "80%",
+      borderColor: "blue",
+      borderWidth: 2,
+    },
+    pickerText: {
+      textAlign: "center",
+      fontSize: 16,
+      color: "black",
+    },
+    modalBackground: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContainer: {
+      backgroundColor: "white",
+      padding: 20,
+      borderRadius: 10,
+      width: "80%",
+      alignItems: "center",
+    },
+    modalTitle: {
+      fontSize: 18,
+      marginBottom: 10,
+    },
+    modalOption: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingVertical: 10,
+      width: "100%",
+      borderBottomWidth: 1,
+      borderColor: "#ccc",
+    },
+    buttonContainer: {
+      backgroundColor: "blue",
+      padding: 10,
+      width: "60%",
+      borderRadius: 5,
+      marginTop: 20,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 30,
+    },
+    logo: {
+      width: 50,
+      height: 50,
+      marginRight: 10,
+      borderRadius: 10,
+    },
+    title: {
+      fontSize: 24,
+      color: "black",
+    },
+    profileImage: {
+      width: 60,
+      height: 60,
+      borderRadius: 10,
+      position: "absolute",
+      top: "-10%",
+      right: "20%",
+    },
+  });
+  
+  export default EditProfile;
+  

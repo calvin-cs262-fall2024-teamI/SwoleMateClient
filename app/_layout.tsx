@@ -39,6 +39,10 @@ export default function RootLayout() {
         <Stack.Screen name="(screens)" options={{ headerShown: false }} />
         <Stack.Screen name="chat" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+
+        {/* Add the Edit Profile and Edit Account Details screens */}
+        <Stack.Screen name="editProfile" options={{ title: "Edit Profile" }} />
+        <Stack.Screen name="editAccountDetails" options={{ title: "Edit Account Details" }} />
       </Stack>
     </ThemeProvider>
   );

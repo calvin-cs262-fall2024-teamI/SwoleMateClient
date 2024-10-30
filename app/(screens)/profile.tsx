@@ -6,21 +6,24 @@ import {
   StyleSheet,
   ImageBackground,
   SafeAreaView,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function Profile() {
-  // User profile data (hardcoded for now)
+  const router = useRouter();
+
   const userProfile = {
     firstName: "John",
     lastName: "Doe",
     age: 25,
     height: "6 ft 2 in",
     weight: "180 lbs",
-    email: "john.doe@example.com", // Added email
-    location: "New York, NY", // Added location
-    fitnessGoals: "Gain Muscle", // Added fitness goals
-    bio: "Fitness enthusiast and gym lover. Always looking to improve and meet new workout partners.", // Added bio
-    profileImage: require("@/assets/portrait_placeholder.png"), // Placeholder image URL
+    email: "john.doe@example.com",
+    location: "New York, NY",
+    fitnessGoals: "Gain Muscle",
+    bio: "Fitness enthusiast and gym lover. Always looking to improve and meet new workout partners.",
+    profileImage: require("@/assets/portrait_placeholder.png"),
   };
 
   return (
@@ -33,10 +36,7 @@ export default function Profile() {
         <View style={styles.container}>
           <Text style={styles.title}>Profile</Text>
 
-          <Image
-            source={userProfile.profileImage}
-            style={styles.profileImage}
-          />
+          <Image source={userProfile.profileImage} style={styles.profileImage} />
 
           <View style={styles.infoContainer}>
             <Text style={styles.userName}>
@@ -48,7 +48,23 @@ export default function Profile() {
             <Text style={styles.infoText}>Height: {userProfile.height}</Text>
             <Text style={styles.infoText}>Weight: {userProfile.weight}</Text>
             <Text style={styles.infoText}>Fitness Goals: {userProfile.fitnessGoals}</Text>
-            <Text style={styles.bioText}>{userProfile.bio}</Text> 
+            <Text style={styles.bioText}>{userProfile.bio}</Text>
+          </View>
+
+          {/* Buttons positioned outside of the profile box */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("../editProfile")}
+            >
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("../editAccountDetails")}
+            >
+              <Text style={styles.buttonText}>Edit Account Details</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ImageBackground>
@@ -67,7 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Slightly transparent background
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   title: {
     fontSize: 24,
@@ -89,6 +105,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 8,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
+    marginBottom: 20, // Spacing below the profile box
   },
   userName: {
     fontSize: 18,
@@ -108,5 +125,21 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontStyle: "italic",
     textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: "blue",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
