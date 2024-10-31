@@ -15,32 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-const MESSAGES = [
-  {
-    id: "1",
-    text: "Hi there! How are you?",
-    time: "15:30",
-    isSelf: false,
-  },
-  {
-    id: "2",
-    text: "I'm doing great, thanks! How about you?",
-    time: "15:31",
-    isSelf: true,
-  },
-  {
-    id: "3",
-    text: "Just finished my workout at the gym",
-    time: "15:32",
-    isSelf: true,
-  },
-  {
-    id: "4",
-    text: "That's awesome! Keep up the good work! 💪",
-    time: "15:33",
-    isSelf: false,
-  },
-];
 
 const MessageItem = ({ message }: { message: any }) => (
   <View
@@ -71,13 +45,20 @@ const MessageItem = ({ message }: { message: any }) => (
       >
         {message.time}
       </Text>
+
     </View>
   </View>
 );
 
 const ChatScreen = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-
+  const [messages, setMessages] = useState([
+    { id: "1", text: "Hi there! How are you?", time: "15:30", isSelf: false },
+    { id: "2", text: "I'm doing great, thanks! How about you?", time: "15:31", isSelf: true },
+    { id: "3", text: "Just finished my workout at the gym", time: "15:32", isSelf: true },
+    { id: "4", text: "That's awesome! Keep up the good work! 💪", time: "15:33", isSelf: false },
+  ]);
+  const [newMessage, setNewMessage] = useState("");
   useEffect(() => {
     const keyboardWillShowListener = Keyboard.addListener(
       "keyboardWillShow",
@@ -93,6 +74,29 @@ const ChatScreen = () => {
       keyboardWillHideListener.remove();
     };
   }, []);
+
+
+  const handleSendMessage = () => {
+    if (newMessage.trim() === "") return; //dont send empty message
+    const currentTime = new Date();
+    const seconds = currentTime.getSeconds();
+
+    const newMessageObject = {
+
+      id: `${Date.now()}-${seconds}`, // Generate a unique ID based on seconds. MAYBE CHANGE IN FUTURE 
+      text: newMessage,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isSelf: true,
+    };
+
+    //The setMessages function can take either a new state value or a function that receives the previous state as an argument. 
+    setMessages((prevMessages) => [...prevMessages, newMessageObject]);
+    setNewMessage("") //clear input field
+
+
+
+
+  };
 
   return (
     <KeyboardAvoidingView
@@ -122,7 +126,7 @@ const ChatScreen = () => {
         </View>
 
         <FlatList
-          data={MESSAGES}
+          data={messages}
           renderItem={({ item }) => <MessageItem message={item} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={[
@@ -139,11 +143,14 @@ const ChatScreen = () => {
             style={styles.input}
             placeholder="Write a message..."
             placeholderTextColor="#666"
+            value={newMessage}
+            onChangeText={setNewMessage}
           />
           <TouchableOpacity>
             <Ionicons name="attach" size={24} color="#666" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sendButton}>
+
+          <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
             <Ionicons name="send" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
