@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  Button,
   FlatList,
   Image,
   StyleSheet,
@@ -10,175 +9,24 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-
-interface User {
-  id: string;
-  name: string;
-  age: number;
-  height: string;
-  weight: string;
-  matched?: boolean;
-  pending?: boolean;
-}
+import { fakeUsers } from "../api/fakedata";
 
 function MatchScreen() {
   // Sample matches to display on the screen - will make these iterative/changeable once the profile is fully done.
-  const [nearbyUsers, setNearbyUsers] = useState<User[]>([
-    { id: "1", name: "John Doe", age: 25, height: "6 ft", weight: "180 lbs" },
-    {
-      id: "2",
-      name: "Jane Doe",
-      age: 28,
-      height: "5 ft 6 in",
-      weight: "150 lbs",
-      pending: false
-    },
-    {
-      id: "3",
-      name: "Beyonce",
-      age: 22,
-      height: "5 ft 7 in",
-      weight: "137 lbs",
-      pending: false
-    },
-    {
-      id: "4",
-      name: "Tom Cruise",
-      age: 27,
-      height: "5 ft 7 in",
-      weight: "201 lbs",
-      pending: false
-    },
-    {
-      id: "5",
-      name: "Jennifer Lopez",
-      age: 24,
-      height: "5 ft 5 in",
-      weight: "120 lbs",
-      pending: false
-    },
-    {
-      id: "6",
-      name: "Brad Pitt",
-      age: 30,
-      height: "6 ft 0 in",
-      weight: "203 lbs",
-      pending: false
-    },
-    {
-      id: "7",
-      name: "Carrie Underwood",
-      age: 26,
-      height: "5 ft 3 in",
-      weight: "117 lbs",
-    },
-    {
-      id: "8",
-      name: "Travis Kelce",
-      age: 29,
-      height: "6 ft 5 in",
-      weight: "250 lbs",
-    },
-    {
-      id: "9",
-      name: "Jennifer Lawrence",
-      age: 23,
-      height: "5 ft 9 in",
-      weight: "138 lbs",
-    },
-    {
-      id: "10",
-      name: "Patrick Mahomes",
-      age: 31,
-      height: "6 ft 2 in",
-      weight: "225 lbs",
-    },
-    {
-      id: "11",
-      name: "Taylor Swift",
-      age: 20,
-      height: "5 ft 11 in",
-      weight: "119 lbs",
-    },
-    {
-      id: "12",
-      name: "Sean John Combs",
-      age: 27,
-      height: "5 ft 10 in",
-      weight: "190 lbs",
-    },
-    {
-      id: "13",
-      name: "Ariana Grande",
-      age: 25,
-      height: "5 ft 0 in",
-      weight: "104 lbs",
-    },
-    {
-      id: "14",
-      name: "Christopher Clark",
-      age: 28,
-      height: "6 ft 1 in",
-      weight: "185 lbs",
-    },
-    {
-      id: "15",
-      name: "Samantha Lewis",
-      age: 22,
-      height: "5 ft 2 in",
-      weight: "120 lbs",
-    },
-    {
-      id: "16",
-      name: "William Walker",
-      age: 26,
-      height: "6 ft 3 in",
-      weight: "210 lbs",
-    },
-    {
-      id: "17",
-      name: "Emily Hall",
-      age: 24,
-      height: "5 ft 5 in",
-      weight: "145 lbs",
-    },
-    {
-      id: "18",
-      name: "Joshua Young",
-      age: 29,
-      height: "5 ft 8 in",
-      weight: "165 lbs",
-    },
-    {
-      id: "19",
-      name: "Isabella King",
-      age: 23,
-      height: "5 ft 4 in",
-      weight: "130 lbs",
-    },
-    {
-      id: "20",
-      name: "Matthew Scott",
-      age: 30,
-      height: "6 ft",
-      weight: "195 lbs",
-    },
-  ]);
+  const [nearbyUsers, setNearbyUsers] = useState(fakeUsers);
 
   const handleMatch = (userId: string) => {
-    setNearbyUsers((prevUsers) =>
-      prevUsers.map((user) =>
+    setNearbyUsers(prevUsers =>
+      prevUsers.map(user =>
         user.id === userId
           ? { ...user, matched: true, pending: true } // Set both matched and pending to true
           : user
       )
     );
-  };  
+  };
 
   const handleIgnore = (userId: string) => {
-    setNearbyUsers((prevUsers) =>
-      prevUsers.filter((user) => user.id !== userId)
-    );
+    setNearbyUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
   };
 
   return (
@@ -194,7 +42,7 @@ function MatchScreen() {
           {/* List of nearby users */}
           <FlatList
             data={nearbyUsers}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             renderItem={({ item }) => (
               <View
                 style={[
@@ -202,10 +50,7 @@ function MatchScreen() {
                   item.matched && styles.matchedUserCard, // Apply green background if matched
                 ]}
               >
-                <Image
-                  source={require("@/assets/SmallerLogo.png")}
-                  style={styles.profileImage}
-                />
+                <Image source={require("@/assets/SmallerLogo.png")} style={styles.profileImage} />
                 <View style={styles.userInfo}>
                   <Text style={styles.userName}>{item.name}</Text>
                   <Text>Age: {item.age}</Text>
@@ -214,20 +59,21 @@ function MatchScreen() {
                 </View>
 
                 <View style={styles.buttonGroup}>
-                {item.matched ? (
-                  <TouchableOpacity style={styles.pendingButton}>
-                    <Text style={styles.buttonText}>
-                      {item.pending ? "Pending" : "Message"} {/* Show "Pending" if pending is true */}
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.matchButton}
-                    onPress={() => handleMatch(item.id)}
-                  >
-                    <Text style={styles.buttonText}>Match</Text>
-                  </TouchableOpacity>
-                )}
+                  {item.matched ? (
+                    <TouchableOpacity style={styles.pendingButton}>
+                      <Text style={styles.buttonText}>
+                        {item.pending ? "Pending" : "Message"}{" "}
+                        {/* Show "Pending" if pending is true */}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.matchButton}
+                      onPress={() => handleMatch(item.id)}
+                    >
+                      <Text style={styles.buttonText}>Match</Text>
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity
                     style={styles.ignoreButton}
                     onPress={() => handleIgnore(item.id)}
@@ -310,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: "orange",
     padding: 10,
     borderRadius: 5,
-  },  
+  },
   buttonText: {
     color: "white",
     textAlign: "center",

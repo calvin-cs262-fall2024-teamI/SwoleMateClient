@@ -1,94 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { IChatItem } from "@/app/api/interfaces";
 
-const DATA = [
-  {
-    id: "1",
-    name: "John Smith",
-    message: "Hey, how's your workout going?",
-    time: "13.18",
-    avatar: require("@/assets/avatars/1.png"),
-  },
-  {
-    id: "2",
-    name: "Emily Johnson",
-    message: "Want to meet up at the gym later?",
-    time: "12.13",
-    avatar: require("@/assets/avatars/2.png"),
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    message: "Thanks for the protein shake recipe!",
-    time: "13.31",
-    avatar: require("@/assets/avatars/3.png"),
-  },
-  {
-    id: "4",
-    name: "Sarah Davis",
-    message: "How was your run this morning?",
-    time: "11.31",
-    avatar: require("@/assets/avatars/4.png"),
-  },
-  {
-    id: "5",
-    name: "David Wilson",
-    message: "Let's plan our next hiking trip!",
-    time: "10.21",
-    avatar: require("@/assets/avatars/5.png"),
-  },
-];
+import { fakeMatches, fakePendings } from "@/app/api/fakedata";
 
-const PENDING_DATA = [
-  {
-    id: "1",
-    name: "Darlene Steward",
-    time: "18.31",
-    avatar: require("@/assets/avatars/1.png"),
-    status: "Pending",
-  },
-  {
-    id: "2",
-    name: "Mike Mazowski",
-    time: "16.04",
-    avatar: require("@/assets/avatars/2.png"),
-    status: "Pending",
-  },
-  {
-    id: "3",
-    name: "Lee Williamson",
-    time: "06.12",
-    avatar: require("@/assets/avatars/3.png"),
-    status: "Pending",
-  },
-  {
-    id: "4",
-    name: "Ronald Mccoy",
-    time: "Yesterday",
-    avatar: require("@/assets/avatars/4.png"),
-    status: "Pending",
-  },
-];
-
-type ChatItemType = {
-  id: string;
-  name: string;
-  message: string;
-  time: string;
-  avatar: any;
-};
-
-const ChatItem = ({ item }: { item: ChatItemType }) => (
+const ChatItem = ({ item }: { item: IChatItem }) => (
   <TouchableOpacity
     style={styles.chatItem}
     onPress={() => {
@@ -113,16 +32,11 @@ const ChatItem = ({ item }: { item: ChatItemType }) => (
 const TabContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
     case "Matched":
-      return (
-        <FlatList
-          data={DATA}
-          renderItem={({ item }) => <ChatItem item={item} />}
-        />
-      );
+      return <FlatList data={fakeMatches} renderItem={({ item }) => <ChatItem item={item} />} />;
     case "Pending":
       return (
         <FlatList
-          data={PENDING_DATA}
+          data={fakePendings}
           renderItem={({ item }) => (
             <View style={styles.pendingItem}>
               <Image source={item.avatar} style={styles.avatar} />
@@ -164,14 +78,7 @@ const RecentChatsScreen = () => {
             style={[styles.tab, activeTab === tab && styles.activeTab]}
             onPress={() => setActiveTab(tab)}
           >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab && styles.activeTabText,
-              ]}
-            >
-              {tab}
-            </Text>
+            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
           </TouchableOpacity>
         ))}
       </View>
