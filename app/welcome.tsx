@@ -57,7 +57,7 @@ function WelcomeScreen() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   // Updated handler for the REGISTER button without validation
   const handleRegister = () => {
@@ -106,23 +106,32 @@ function WelcomeScreen() {
               placeholder="Email"
               value={email}
               onChangeText={setEmail}
+              onEndEditing={() => {
+                // Simple email validation regex
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                setEmailValid(emailRegex.test(email));
+              }}
               style={[styles.input, !emailValid && styles.invalidInput]}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <TextInput
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
+              onEndEditing={() => {
+                // Simple password validation regex: at least 8 characters
+                const passwordRegex = /^.{8,}$/;
+                setPasswordValid(passwordRegex.test(password));
+              }}
               secureTextEntry
               style={[styles.input, !passwordValid && styles.invalidInput]}
             />
           </View>
 
           <View style={styles.buttonContainer}>
-            <Button
-              title="SIGN IN"
-              onPress={handleSignin}
-              color="white"
-            />
+            <Button title="SIGN IN" onPress={handleSignin} color="white" />
           </View>
 
           <View style={styles.buttonContainer}>
