@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -59,6 +59,8 @@ const ChatScreen = () => {
     { id: "4", text: "That's awesome! Keep up the good work! 💪", time: "15:33", isSelf: false },
   ]);
   const [newMessage, setNewMessage] = useState("");
+  const flatListRef = useRef<FlatList>(null); // Create a ref for FlatList
+
   useEffect(() => {
     const keyboardWillShowListener = Keyboard.addListener(
       "keyboardWillShow",
@@ -93,7 +95,8 @@ const ChatScreen = () => {
     setMessages((prevMessages) => [...prevMessages, newMessageObject]);
     setNewMessage("") //clear input field
 
-
+    // Scroll to the end after message is added
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
 
 
   };
@@ -129,10 +132,9 @@ const ChatScreen = () => {
           data={messages}
           renderItem={({ item }) => <MessageItem message={item} />}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[
-            styles.messageContainer,
-            { paddingBottom: keyboardHeight },
-          ]}
+          ref={flatListRef}
+          contentContainerStyle={styles.messageContainer}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
 
         <View style={styles.inputContainer}>
@@ -238,10 +240,11 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",
-    gap: 12,
+
   },
   input: {
     flex: 1,
