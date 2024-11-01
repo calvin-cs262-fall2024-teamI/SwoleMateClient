@@ -204,7 +204,7 @@ function EditProfile() {
                         <Text style={styles.modalTitle}>
                           Preferred Time to Workout:
                         </Text>
-                        {["morning", "afternoon", "evening"].map((item) => (
+                        {["morning", "afternoon", "evening", "no preference"].map((item) => (
                           <TouchableOpacity
                             key={item}
                             onPress={() =>
@@ -233,6 +233,7 @@ function EditProfile() {
                           "hypertrophy-upper-pull",
                           "hypertrophy-lower-body",
                           "recovery",
+                          "no preference",
                         ].map((item) => (
                           <TouchableOpacity
                             key={item}

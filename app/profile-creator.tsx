@@ -229,7 +229,7 @@ function ProfileCreator() {
                     {activePicker === "preferredTime" && (
                       <View className="w-full">
                         <Text style={styles.modalTitle}>Preferred Time to Workout:</Text>
-                        {["morning", "afternoon", "evening"].map(item => (
+                        {["morning", "afternoon", "evening", "no preference"].map(item => (
                           <TouchableOpacity
                             key={item}
                             onPress={() => handleSelection(item, "preferredTime")}
@@ -254,6 +254,7 @@ function ProfileCreator() {
                           "hypertrophy-upper-pull",
                           "hypertrophy-lower-body",
                           "recovery",
+                          "no preference",
                         ].map(item => (
                           <TouchableOpacity
                             key={item}
