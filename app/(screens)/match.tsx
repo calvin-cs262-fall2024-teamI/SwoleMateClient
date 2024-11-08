@@ -13,37 +13,69 @@ import {
 import RNPickerSelect from "react-native-picker-select"; // Import the dropdown package
 import { fakeUsers } from "../api/fakedata";
 import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome for star icons
+import { IUserMatch } from "../api/interfaces";
 
 function MatchScreen() {
   const [nearbyUsers, setNearbyUsers] = useState(fakeUsers);
-  const [selectedFilter, setSelectedFilter] = useState(null); // State for dropdown selection
+  const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(null); // State for dropdown selection
   const [specificFilter, setSpecificFilter] = useState(""); // State for text input
 
-  const handleMatch = (userId) => {
+  const handleMatch = (userId: number | string) => {
     setNearbyUsers(prevUsers =>
       prevUsers.map(user =>
         user.id === userId
-          ? { ...user, matched: true, pending: true } // Set user as matched and pending
-          : user
+          ? { ...user, matched: true, pending: true } : user // Set user as matched and pending
       )
     );
   };
 
-  const handleIgnore = (userId) => {
+  //TODO This should be type number? Update interfaces.ts and fakedata.ts field types
+  const handleIgnore = (userId: number | string) => {
     setNearbyUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
   };
 
   // Function to filter users based on selected filter and text input
   const filterUsers = () => {
-    return nearbyUsers.filter(user => {
-      const matchesFilter = selectedFilter
-        ? user[selectedFilter] && user[selectedFilter].toString().toLowerCase().includes(specificFilter.toLowerCase()) // Check selected filter field
-        : true;
-      const matchesText = user.name.toLowerCase().includes(specificFilter.toLowerCase());
-      return matchesFilter && matchesText;
+    return nearbyUsers.filter((user) => {
+      if (!selectedFilter || !specificFilter) return true;
+
+      const filterValue = specificFilter.trim().toLowerCase();
+
+      switch (selectedFilter) {
+        case "age":
+          const ageFilter = parseInt(specificFilter, 10);
+          return user.age === ageFilter;
+
+        case "city":
+          return user.city.toLowerCase().includes(filterValue);
+
+        case "gym":
+          return user.gym.toLowerCase().includes(filterValue);
+
+        case "rating":
+          const ratingFilter = parseFloat(specificFilter);
+          return user.rating >= ratingFilter; // Filter for rating equal or above
+
+        case "experience":
+          return user.experience.toLowerCase().includes(filterValue);
+
+        case "isTrainer":
+          // Check for "trainer" or "regular" with case-insensitive comparison
+          if (filterValue === "trainer") {
+            return user.isTrainer;
+          } else if (filterValue === "regular") {
+            return !user.isTrainer;
+          }
+          return false;
+
+
+        default:
+          return true;
+      }
     });
   };
-  
+
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -54,7 +86,7 @@ function MatchScreen() {
       >
         <View style={styles.container}>
           {/* Removed Match Screen title */}
-          
+
           {/* Filter container for dropdown and text input */}
           <View style={styles.filterContainer}>
             <RNPickerSelect
@@ -65,8 +97,8 @@ function MatchScreen() {
                 { label: "Age", value: "age" },
                 { label: "Gym", value: "gym" },
                 { label: "Rating", value: "rating" },
-                { label: "Regular or Trainer", value: "regularTrainer" },
-                { label: "Experience", value: "experience"},
+                { label: "Regular or Trainer", value: "isTrainer" },
+                { label: "Experience", value: "experience" },
               ]}
               style={pickerSelectStyles}
             />
@@ -81,12 +113,12 @@ function MatchScreen() {
           {/* List of nearby users */}
           <FlatList
             data={filterUsers()}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => (
               <View
                 style={[
                   styles.userCard,
-                  item.matched && styles.matchedUserCard,
+                  //item.matched && styles.matchedUserCard,
                   item.showMore && styles.expandedUserCard, // Change background if expanded
                 ]}
               >
@@ -95,8 +127,8 @@ function MatchScreen() {
                   <Text style={styles.userName}>{item.name}</Text>
                   <Text>Age: {item.age}</Text>
                   <Text>{item.typeOfWorkout}</Text>
-                  <Text>{item.gymChoice}</Text>
-            
+                  <Text>{item.gym}</Text>
+
                   {/* Conditional rendering of additional user info */}
                   {item.showMore && (
                     <View>
@@ -117,17 +149,17 @@ function MatchScreen() {
                     <Text style={styles.buttonText}>{item.showMore ? "Show Less" : "Read More"}</Text>
                   </TouchableOpacity>
                 </View>
-            
+
                 <TouchableOpacity
                   style={styles.ignoreButton}
                   onPress={() => handleIgnore(item.id)}
                 >
                   <Text style={styles.buttonText}>X</Text>
                 </TouchableOpacity>
-            
+
                 <TouchableOpacity
                   style={[
-                    styles.matchButton,
+                    //styles.matchButton,
                     item.pending ? styles.pendingButton : styles.defaultButton, // Change style based on pending state
                   ]}
                   onPress={() => handleMatch(item.id)}
