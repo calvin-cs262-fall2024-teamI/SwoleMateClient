@@ -157,16 +157,6 @@ function EditProfile() {
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.pickerLabel}>Workout Type:</Text>
-          <TouchableOpacity
-            style={styles.pickerContainer}
-            onPress={() => openModal("workoutType")}
-          >
-            <Text style={styles.pickerText}>
-              {workoutType.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
-            </Text>
-          </TouchableOpacity>
-
           <Text style={styles.pickerLabel}>Experience Level:</Text>
           <TouchableOpacity
             style={styles.pickerContainer}

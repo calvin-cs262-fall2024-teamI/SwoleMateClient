@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -15,32 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-const MESSAGES = [
-  {
-    id: "1",
-    text: "Hi there! How are you?",
-    time: "15:30",
-    isSelf: false,
-  },
-  {
-    id: "2",
-    text: "I'm doing great, thanks! How about you?",
-    time: "15:31",
-    isSelf: true,
-  },
-  {
-    id: "3",
-    text: "Just finished my workout at the gym",
-    time: "15:32",
-    isSelf: true,
-  },
-  {
-    id: "4",
-    text: "That's awesome! Keep up the good work! 💪",
-    time: "15:33",
-    isSelf: false,
-  },
-];
 
 const MessageItem = ({ message }: { message: any }) => (
   <View
@@ -71,12 +45,21 @@ const MessageItem = ({ message }: { message: any }) => (
       >
         {message.time}
       </Text>
+
     </View>
   </View>
 );
 
 const ChatScreen = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [messages, setMessages] = useState([
+    { id: "1", text: "Hi there! How are you?", time: "15:30", isSelf: false },
+    { id: "2", text: "I'm doing great, thanks! How about you?", time: "15:31", isSelf: true },
+    { id: "3", text: "Just finished my workout at the gym", time: "15:32", isSelf: true },
+    { id: "4", text: "That's awesome! Keep up the good work! 💪", time: "15:33", isSelf: false },
+  ]);
+  const [newMessage, setNewMessage] = useState("");
+  const flatListRef = useRef<FlatList>(null); // Create a ref for FlatList
 
   useEffect(() => {
     const keyboardWillShowListener = Keyboard.addListener(
@@ -93,6 +76,30 @@ const ChatScreen = () => {
       keyboardWillHideListener.remove();
     };
   }, []);
+
+
+  const handleSendMessage = () => {
+    if (newMessage.trim() === "") return; //dont send empty message
+    const currentTime = new Date();
+    const seconds = currentTime.getSeconds();
+
+    const newMessageObject = {
+
+      id: `${Date.now()}-${seconds}`, // Generate a unique ID based on seconds. MAYBE CHANGE IN FUTURE 
+      text: newMessage,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isSelf: true,
+    };
+
+    //The setMessages function can take either a new state value or a function that receives the previous state as an argument. 
+    setMessages((prevMessages) => [...prevMessages, newMessageObject]);
+    setNewMessage("") //clear input field
+
+    // Scroll to the end after message is added
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+
+
+  };
 
   return (
     <KeyboardAvoidingView
@@ -122,13 +129,12 @@ const ChatScreen = () => {
         </View>
 
         <FlatList
-          data={MESSAGES}
+          data={messages}
           renderItem={({ item }) => <MessageItem message={item} />}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[
-            styles.messageContainer,
-            { paddingBottom: keyboardHeight },
-          ]}
+          ref={flatListRef}
+          contentContainerStyle={styles.messageContainer}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         />
 
         <View style={styles.inputContainer}>
@@ -139,11 +145,14 @@ const ChatScreen = () => {
             style={styles.input}
             placeholder="Write a message..."
             placeholderTextColor="#666"
+            value={newMessage}
+            onChangeText={setNewMessage}
           />
           <TouchableOpacity>
             <Ionicons name="attach" size={24} color="#666" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sendButton}>
+
+          <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
             <Ionicons name="send" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
@@ -231,10 +240,11 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",
-    gap: 12,
+
   },
   input: {
     flex: 1,

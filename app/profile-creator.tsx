@@ -85,17 +85,12 @@ function ProfileCreator() {
       <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
           <View style={styles.header}>
-            <Image
-              source={require("@/assets/SmallerLogo.png")}
-              style={styles.logo}
-            />
+            <Image source={require("@/assets/SmallerLogo.png")} style={styles.logo} />
             <Text style={styles.title}>Create Your Profile</Text>
           </View>
 
           <TouchableOpacity onPress={handlePickImageAsync}>
-            <Text
-              style={[styles.selectprofileText, styles.selectProfileImageBox]}
-            >
+            <Text style={[styles.selectprofileText, styles.selectProfileImageBox]}>
               Select Profile Image
             </Text>
           </TouchableOpacity>
@@ -130,9 +125,7 @@ function ProfileCreator() {
                   !passwordMatch && styles.invalidInput, // Style change if passwords don't match
                 ]}
               />
-              {!passwordMatch && (
-                <Text style={styles.errorText}>Passwords do not match</Text>
-              )}
+              {!passwordMatch && <Text style={styles.errorText}>Passwords do not match</Text>}
 
               <Text style={styles.label}>First Name</Text>
               <TextInput
@@ -192,12 +185,7 @@ function ProfileCreator() {
               />
             </View>
 
-            {profileImage && (
-              <Image
-                source={{ uri: profileImage }}
-                style={styles.profileImage}
-              />
-            )}
+            {profileImage && <Image source={{ uri: profileImage }} style={styles.profileImage} />}
 
             <Text style={styles.pickerLabel}>Preferred Time to Workout:</Text>
             <TouchableOpacity
@@ -215,9 +203,7 @@ function ProfileCreator() {
               onPress={() => openModal("workoutType")}
             >
               <Text style={styles.pickerText}>
-                {workoutType
-                  .replace(/-/g, " ")
-                  .replace(/\b\w/g, (char) => char.toUpperCase())}
+                {workoutType.replace(/-/g, " ").replace(/\b\w/g, char => char.toUpperCase())}
               </Text>
             </TouchableOpacity>
 
@@ -227,8 +213,7 @@ function ProfileCreator() {
               onPress={() => openModal("experienceLevel")}
             >
               <Text style={styles.pickerText}>
-                {experienceLevel.charAt(0).toUpperCase() +
-                  experienceLevel.slice(1)}
+                {experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)}
               </Text>
             </TouchableOpacity>
 
@@ -242,21 +227,15 @@ function ProfileCreator() {
                 <View style={styles.modalBackground}>
                   <View style={styles.modalContainer}>
                     {activePicker === "preferredTime" && (
-                      <View>
-                        <Text style={styles.modalTitle}>
-                          Preferred Time to Workout:
-                        </Text>
-                        {["morning", "afternoon", "evening"].map((item) => (
+                      <View className="w-full">
+                        <Text style={styles.modalTitle}>Preferred Time to Workout:</Text>
+                        {["morning", "afternoon", "evening", "no preference"].map(item => (
                           <TouchableOpacity
                             key={item}
-                            onPress={() =>
-                              handleSelection(item, "preferredTime")
-                            }
+                            onPress={() => handleSelection(item, "preferredTime")}
                             style={styles.modalOption}
                           >
-                            <Text>
-                              {item.charAt(0).toUpperCase() + item.slice(1)}
-                            </Text>
+                            <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
                             {preferredTime === item && <Text> ✔</Text>}
                           </TouchableOpacity>
                         ))}
@@ -264,7 +243,7 @@ function ProfileCreator() {
                     )}
 
                     {activePicker === "workoutType" && (
-                      <View>
+                      <View className="w-full">
                         <Text style={styles.modalTitle}>Workout Type:</Text>
                         {[
                           "cardio",
@@ -275,16 +254,15 @@ function ProfileCreator() {
                           "hypertrophy-upper-pull",
                           "hypertrophy-lower-body",
                           "recovery",
-                        ].map((item) => (
+                          "no preference",
+                        ].map(item => (
                           <TouchableOpacity
                             key={item}
                             onPress={() => handleSelection(item, "workoutType")}
                             style={styles.modalOption}
                           >
                             <Text>
-                              {item
-                                .replace(/-/g, " ")
-                                .replace(/\b\w/g, (char) => char.toUpperCase())}
+                              {item.replace(/-/g, " ").replace(/\b\w/g, char => char.toUpperCase())}
                             </Text>
                             {workoutType === item && <Text> ✔</Text>}
                           </TouchableOpacity>
@@ -293,24 +271,18 @@ function ProfileCreator() {
                     )}
 
                     {activePicker === "experienceLevel" && (
-                      <View>
+                      <View className="w-full">
                         <Text style={styles.modalTitle}>Experience Level:</Text>
-                        {["beginner", "intermediate", "advanced", "expert"].map(
-                          (item) => (
-                            <TouchableOpacity
-                              key={item}
-                              onPress={() =>
-                                handleSelection(item, "experienceLevel")
-                              }
-                              style={styles.modalOption}
-                            >
-                              <Text>
-                                {item.charAt(0).toUpperCase() + item.slice(1)}
-                              </Text>
-                              {experienceLevel === item && <Text> ✔</Text>}
-                            </TouchableOpacity>
-                          )
-                        )}
+                        {["beginner", "intermediate", "advanced", "expert"].map(item => (
+                          <TouchableOpacity
+                            key={item}
+                            onPress={() => handleSelection(item, "experienceLevel")}
+                            style={styles.modalOption}
+                          >
+                            <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+                            {experienceLevel === item && <Text> ✔</Text>}
+                          </TouchableOpacity>
+                        ))}
                       </View>
                     )}
 
@@ -321,11 +293,7 @@ function ProfileCreator() {
             </Modal>
 
             <View style={styles.buttonContainer}>
-              <Button
-                title="Save Profile"
-                onPress={() => router.push("/match")}
-                color="white"
-              />
+              <Button title="Save Profile" onPress={() => router.push("/match")} color="white" />
             </View>
           </View>
         </ScrollView>
