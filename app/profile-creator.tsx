@@ -84,9 +84,11 @@ function ProfileCreator() {
     <SafeAreaView style={{ backgroundColor: "white" }}>
       <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
         <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 20 }}>
+          
           <View style={styles.header}>
             <Image source={require("@/assets/SmallerLogo.png")} style={styles.logo} />
             <Text style={styles.title}>Create Your Profile</Text>
+            {profileImage && <Image source={{ uri: profileImage }} style={styles.profileImage} />}
           </View>
 
           <TouchableOpacity onPress={handlePickImageAsync}>
@@ -185,7 +187,6 @@ function ProfileCreator() {
               />
             </View>
 
-            {profileImage && <Image source={{ uri: profileImage }} style={styles.profileImage} />}
 
             <Text style={styles.pickerLabel}>Preferred Time to Workout:</Text>
             <TouchableOpacity
@@ -437,15 +438,19 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     color: "black",
+    textAlign: "center",
   },
   profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    position: "absolute",
-    top: "-10%",
-    right: "20%",
+    width: 70,
+    height: 70,
+    borderColor: "blue",
+    borderWidth: 2,
+    borderRadius: 40, // Circular shape
+    marginTop: 0,   
+    right: "-30%",
+    bottom: "-20%",
   },
+  
 });
 
 export default ProfileCreator;
