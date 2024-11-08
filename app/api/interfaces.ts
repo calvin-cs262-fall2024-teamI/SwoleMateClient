@@ -1,9 +1,18 @@
+
+
 export interface IUserMatch {
   id: string;
   name: string;
   age: number;
-  height: string;
-  weight: string;
+  height: number;
+  typeOfWorkout: string;
+  weight: number;
+  gym: string;
+  city: string;
+  rating: number;
+  experience: string;
+  showMore?: boolean;
+  isTrainer: boolean;
   matched?: boolean;
   pending?: boolean;
 }
