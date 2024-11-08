@@ -51,7 +51,6 @@ export default function Profile() {
             <Text style={styles.bioText}>{userProfile.bio}</Text>
           </View>
 
-          {/* Buttons positioned outside of the profile box */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
@@ -101,11 +100,11 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     padding: 10,
-    borderColor: "blue",
+    borderColor: "#6A5ACD", // Matches the EditProfile border color
     borderWidth: 2,
     borderRadius: 8,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
-    marginBottom: 20, // Spacing below the profile box
+    marginBottom: 20,
   },
   userName: {
     fontSize: 18,
@@ -132,10 +131,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: "blue",
+    backgroundColor: "#6A5ACD", // Matches the EditProfile button color
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
+    alignItems: "center",
   },
   buttonText: {
     color: "white",

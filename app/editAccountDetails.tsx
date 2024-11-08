@@ -25,14 +25,14 @@ export default function EditAccountDetails() {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: "black", flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Edit Account Details</Text>
 
         <Text style={styles.label}>New Username</Text>
         <TextInput
           style={styles.input}
-          placeholder="Username"
+          placeholder="Nothing"
           value={username}
           onChangeText={setUsername}
         />
@@ -62,8 +62,8 @@ export default function EditAccountDetails() {
           <Text style={styles.errorText}>Passwords do not match</Text>
         )}
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSaveChanges}>
-          <Text style={styles.saveButtonText}>Update Account</Text>
+        <TouchableOpacity style={styles.updateButton} onPress={handleSaveChanges}>
+          <Text style={styles.updateButtonText}>Update Account</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -106,14 +106,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 10,
   },
-  saveButton: {
-    backgroundColor: "#007bff",
-    paddingVertical: 15,
+  updateButton: {
+    backgroundColor: "#6A5ACD",
+    padding: 15,
     borderRadius: 8,
     alignItems: "center",
+    width: "60%",
+    alignSelf: "center",
     marginTop: 20,
   },
-  saveButtonText: {
+  updateButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
