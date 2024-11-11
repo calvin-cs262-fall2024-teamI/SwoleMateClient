@@ -6,10 +6,10 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 
-import { AuthProvider } from "./authentication/AuthContext"; // Import AuthProvider
+import { AuthProvider } from "./authentication/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -20,19 +20,22 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
   });
+  const [appReady, setAppReady] = useState(false); // Track app readiness
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      setAppReady(true); // Set app ready state once fonts are loaded
+      SplashScreen.hideAsync(); // Hide the splash screen
     }
   }, [loaded]);
 
-  if (!loaded) {
+  if (!appReady) {
+    // Ensure nothing is rendered until fonts are loaded
     return null;
   }
 
   return (
-    <AuthProvider> {/* Wrap in AuthProvider */}
+    <AuthProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -41,8 +44,6 @@ export default function RootLayout() {
           <Stack.Screen name="(screens)" options={{ headerShown: false }} />
           <Stack.Screen name="chat" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
-
-          {/* Add the Edit Profile and Edit Account Details screens */}
           <Stack.Screen name="editProfile" options={{ title: "Edit Profile" }} />
           <Stack.Screen name="editAccountDetails" options={{ title: "Edit Account Details" }} />
         </Stack>
