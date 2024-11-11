@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import {
   Button,
   Image,
@@ -11,23 +11,32 @@ import {
   View,
 } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
+import { AuthContext } from "./authentication/AuthContext";
 
-const RenderSlide = ({ item }: { item: any }): JSX.Element => {
-  return (
-    <View style={styles.slideContainer}>
-      <Image source={item.image} style={styles.image} />
-      <View style={styles.overlay} />
-      <Text style={styles.text}>{item.text}</Text>
-    </View>
-  );
-};
+const RenderSlide = ({ item }: { item: any }): JSX.Element => (
+  <View style={styles.slideContainer}>
+    <Image source={item.image} style={styles.image} />
+    <View style={styles.overlay} />
+    <Text style={styles.text}>{item.text}</Text>
+  </View>
+);
 
 function WelcomeScreen() {
   const router = useRouter();
+
+  // Get auth context and verify it's not undefined
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error("AuthContext is not available. Ensure AuthProvider wraps the app.");
+  }
+
+  const { login } = authContext; // Now TypeScript knows `login` exists
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailValid, setEmailValid] = useState(true);
   const [passwordValid, setPasswordValid] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const sliderRef = useRef<AppIntroSlider | null>(null);
 
@@ -59,12 +68,11 @@ function WelcomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  // Updated handler for the REGISTER button without validation
   const handleRegister = () => {
-    router.push("/profile-creator"); // Navigate to the profile creator screen without validation
+    router.push("/profile-creator");
   };
 
-  const handleSignin = () => {
+  const handleSignin = async () => {
     const isEmailValid = email !== "";
     const isPasswordValid = password !== "";
 
@@ -72,9 +80,14 @@ function WelcomeScreen() {
     setPasswordValid(isPasswordValid);
 
     if (isEmailValid && isPasswordValid) {
-      // navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
+      try {
+        await login(email, password);
+        router.push("/match");
+      } catch (error) {
+        setErrorMessage((error as Error).message || "Login failed, please try again.");
+      }
     } else {
-      console.log("Fill the textboxes");
+      setErrorMessage("Please fill in both fields.");
     }
   };
 
@@ -117,20 +130,14 @@ function WelcomeScreen() {
             />
           </View>
 
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
           <View style={styles.buttonContainer}>
-            <Button
-              title="SIGN IN"
-              onPress={handleSignin}
-              color="white"
-            />
+            <Button title="SIGN IN" onPress={handleSignin} color="white" />
           </View>
 
           <View style={styles.buttonContainer}>
-            <Button
-              title="REGISTER"
-              onPress={handleRegister} // Skip validation for registration
-              color="white"
-            />
+            <Button title="REGISTER" onPress={handleRegister} color="white" />
           </View>
         </View>
       </View>
@@ -208,6 +215,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+  },
 });
+
 
 export default WelcomeScreen;

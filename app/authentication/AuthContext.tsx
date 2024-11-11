@@ -1,4 +1,5 @@
 // src/auth/AuthContext.tsx
+
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { signUp as signUpService, login as loginService, logout as logoutService, User } from "./authService";
@@ -10,7 +11,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Use a type assertion to tell TypeScript `AuthContext` will always have a value
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 interface AuthProviderProps {
   children: ReactNode;

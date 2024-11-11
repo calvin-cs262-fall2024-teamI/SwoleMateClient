@@ -9,6 +9,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
+import { AuthProvider } from "./authentication/AuthContext"; // Import AuthProvider
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -31,19 +32,21 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="welcome" options={{ headerShown: false }} />
-        <Stack.Screen name="profile-creator" options={{ headerShown: false }} />
-        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-        <Stack.Screen name="chat" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+    <AuthProvider> {/* Wrap in AuthProvider */}
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="welcome" options={{ headerShown: false }} />
+          <Stack.Screen name="profile-creator" options={{ headerShown: false }} />
+          <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+          <Stack.Screen name="chat" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
 
-        {/* Add the Edit Profile and Edit Account Details screens */}
-        <Stack.Screen name="editProfile" options={{ title: "Edit Profile" }} />
-        <Stack.Screen name="editAccountDetails" options={{ title: "Edit Account Details" }} />
-      </Stack>
-    </ThemeProvider>
+          {/* Add the Edit Profile and Edit Account Details screens */}
+          <Stack.Screen name="editProfile" options={{ title: "Edit Profile" }} />
+          <Stack.Screen name="editAccountDetails" options={{ title: "Edit Account Details" }} />
+        </Stack>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
