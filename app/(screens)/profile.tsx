@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -9,22 +9,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { UserContext } from "../UserContext"; // Import UserContext
 
 export default function Profile() {
   const router = useRouter();
-
-  const userProfile = {
-    firstName: "John",
-    lastName: "Doe",
-    age: 25,
-    height: "6 ft 2 in",
-    weight: "180 lbs",
-    email: "john.doe@example.com",
-    location: "New York, NY",
-    fitnessGoals: "Gain Muscle",
-    bio: "Fitness enthusiast and gym lover. Always looking to improve and meet new workout partners.",
-    profileImage: require("@/assets/portrait_placeholder.png"),
-  };
+  const { userInfo } = useContext(UserContext); // Access user data from context
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -36,19 +25,45 @@ export default function Profile() {
         <View style={styles.container}>
           <Text style={styles.title}>Profile</Text>
 
-          <Image source={userProfile.profileImage} style={styles.profileImage} />
+          {/* Display profile image or placeholder */}
+          <Image
+            source={
+              userInfo.profileImage
+                ? { uri: userInfo.profileImage }
+                : require("@/assets/portrait_placeholder.png")
+            }
+            style={styles.profileImage}
+          />
 
           <View style={styles.infoContainer}>
             <Text style={styles.userName}>
-              {userProfile.firstName} {userProfile.lastName}
+              {userInfo.firstName || "First Name"}{" "}
+              {userInfo.lastName || "Last Name"}
             </Text>
-            <Text style={styles.infoText}>Email: {userProfile.email}</Text>
-            <Text style={styles.infoText}>Location: {userProfile.location}</Text>
-            <Text style={styles.infoText}>Age: {userProfile.age}</Text>
-            <Text style={styles.infoText}>Height: {userProfile.height}</Text>
-            <Text style={styles.infoText}>Weight: {userProfile.weight}</Text>
-            <Text style={styles.infoText}>Fitness Goals: {userProfile.fitnessGoals}</Text>
-            <Text style={styles.bioText}>{userProfile.bio}</Text>
+            <Text style={styles.infoText}>
+              Age: {userInfo.age ? `${userInfo.age} years` : "N/A"}
+            </Text>
+            <Text style={styles.infoText}>
+              Height:{" "}
+              {userInfo.heightFt && userInfo.heightIn
+                ? `${userInfo.heightFt} ft ${userInfo.heightIn} in`
+                : "N/A"}
+            </Text>
+            <Text style={styles.infoText}>
+              Weight: {userInfo.weight ? `${userInfo.weight} lbs` : "N/A"}
+            </Text>
+            <Text style={styles.infoText}>
+              Preferred Time: {userInfo.preferredTime || "N/A"}
+            </Text>
+            <Text style={styles.infoText}>
+              Workout Type: {userInfo.workoutType || "N/A"}
+            </Text>
+            <Text style={styles.infoText}>
+              Experience Level: {userInfo.experienceLevel || "N/A"}
+            </Text>
+            <Text style={styles.bioText}>
+              {userInfo.personalBio || "No bio available."}
+            </Text>
           </View>
 
           <View style={styles.buttonContainer}>
