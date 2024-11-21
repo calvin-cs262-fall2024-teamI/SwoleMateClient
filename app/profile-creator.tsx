@@ -17,7 +17,7 @@ import {
   Platform,
   StyleSheet,
 } from "react-native";
-import { UserContext } from "./UserContext";
+import { UserContext } from "../nonapp/UserContext";
 
 function ProfileCreator() {
   const [username, setUsername] = useState("");

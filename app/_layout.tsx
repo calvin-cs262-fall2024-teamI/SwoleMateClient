@@ -11,7 +11,7 @@ import "react-native-reanimated";
 import "../global.css";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { UserProvider } from "./UserContext"; // Import the UserProvider
+import { UserProvider } from "../nonapp/UserContext"; // Import the UserProvider
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,7 +33,6 @@ export default function RootLayout() {
 
   return (
     <UserProvider>
-      {" "}
       {/* Wrap the app in UserProvider */}
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>

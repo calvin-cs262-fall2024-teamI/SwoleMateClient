@@ -15,6 +15,7 @@ import gymBackground from "@/assets/gym_background.jpg";
 import twoPeopleWorkingOut from "@/assets/two_people_working_out.jpg";
 import coupleWorking from "@/assets/couple_working.jpg";
 import smallerLogo from "@/assets/SmallerLogo.png";
+import { verifyLogin } from "../api";
 
 import { ImageSourcePropType } from "react-native";
 
@@ -75,7 +76,7 @@ const WelcomeScreen: React.FC = () => {
     router.push("/profile-creator");
   };
 
-  const handleSignin = () => {
+  const handleSignin = async () => {
     const isEmailValid = email !== "";
     const isPasswordValid = password !== "";
 
@@ -83,6 +84,10 @@ const WelcomeScreen: React.FC = () => {
     setPasswordValid(isPasswordValid);
 
     if (isEmailValid && isPasswordValid) {
+      // const rsp = await verifyLogin({ emailAddress: email, password });
+      // if (rsp.success) {
+      //   router.push("/match");
+      // }
       // navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
     } else {
       console.log("Fill the textboxes");

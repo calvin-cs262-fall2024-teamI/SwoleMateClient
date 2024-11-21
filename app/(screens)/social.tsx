@@ -1,11 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { IChatItem } from "@/app/api/interfaces";
+import { IChatItem } from "@/api/interfaces";
 
-import { fakeMatches, fakePendings } from "@/app/api/fakedata";
+import { fakeMatches, fakePendings } from "@/api/fakedata";
 
 const ChatItem = ({ item }: { item: IChatItem }) => (
   <TouchableOpacity
@@ -32,7 +39,12 @@ const ChatItem = ({ item }: { item: IChatItem }) => (
 const TabContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
     case "Matched":
-      return <FlatList data={fakeMatches} renderItem={({ item }) => <ChatItem item={item} />} />;
+      return (
+        <FlatList
+          data={fakeMatches}
+          renderItem={({ item }) => <ChatItem item={item} />}
+        />
+      );
     case "Pending":
       return (
         <FlatList
@@ -78,7 +90,14 @@ const RecentChatsScreen = () => {
             style={[styles.tab, activeTab === tab && styles.activeTab]}
             onPress={() => setActiveTab(tab)}
           >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab && styles.activeTabText,
+              ]}
+            >
+              {tab}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>

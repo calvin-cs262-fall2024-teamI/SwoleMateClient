@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { UserContext } from "../UserContext"; // Import UserContext
+import { UserContext } from "../../nonapp/UserContext"; // Import UserContext
 
 export default function Profile() {
   const router = useRouter();

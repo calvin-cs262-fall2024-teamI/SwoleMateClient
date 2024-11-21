@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { UserContext } from "./UserContext";
+import { UserContext } from "../nonapp/UserContext";
 
 function EditProfile() {
   const { userInfo, setUserInfo } = useContext(UserContext); // Retrieve user data from context

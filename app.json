@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "SwoleMate",
+    "newArchEnabled": true,
     "slug": "swolemate",
     "version": "1.0.0",
     "orientation": "portrait",

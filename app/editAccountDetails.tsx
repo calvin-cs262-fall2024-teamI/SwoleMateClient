@@ -52,7 +52,7 @@ export default function EditAccountDetails() {
           placeholder="Confirm New Password"
           secureTextEntry
           value={confirmPassword}
-          onChangeText={(text) => {
+          onChangeText={text => {
             setConfirmPassword(text);
             setPasswordMatch(newPassword === text);
           }}
