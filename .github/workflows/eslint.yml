@@ -6,20 +6,29 @@ on:
       - main
 
 jobs:
-  eslint:
+  lint:
+    name: Run ESLint
     runs-on: ubuntu-latest
 
     steps:
-      - name: check out repo
-        uses: actions/checkout@v2
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: set up node
+      # Set up Node.js (latest version)
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: "lts/*" # Use the latest LTS Node.js version
 
-      - name: npm install
-        run: npm ci
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-      - name: eslint
+      # confirm the node.js version being used
+      - name: Verify Node.js version
+        run: node -v
+
+      # Run ESLint
+      - name: Run ESLint
         run: npm run lint

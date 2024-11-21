@@ -35,7 +35,6 @@ const ChatItem = ({ item }: { item: IChatItem }) => (
     <Text style={styles.time}>{item.time}</Text>
   </TouchableOpacity>
 );
-
 const TabContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
     case "Matched":
@@ -86,7 +85,7 @@ const RecentChatsScreen = () => {
       <View style={styles.tabs}>
         {["Matched", "Pending", "Requests"].map((tab, index) => (
           <TouchableOpacity
-            key={tab}
+            key={(tab, index)}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
             onPress={() => setActiveTab(tab)}
           >

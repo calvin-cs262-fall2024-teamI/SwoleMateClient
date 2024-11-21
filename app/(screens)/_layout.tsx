@@ -1,6 +1,9 @@
 import { Tabs } from "expo-router";
 import { Text, View, Image } from "react-native";
-
+//YOU CANT USE REQUIRE. YOU MUST IMPORT INSTEAD.
+import matchIcon from "../../assets/navbar/match.png";
+import profileIcon from "../../assets/navbar/profile.png";
+import chatIcon from "../../assets/navbar/chat.png";
 const CustomTab = ({
   focused,
   icon,
@@ -58,10 +61,7 @@ export default function TabLayout() {
               <CustomTab
                 focused={focused}
                 icon={
-                  <Image
-                    source={require("../../assets/navbar/match.png")}
-                    style={{ width: 24, height: 24 }}
-                  />
+                  <Image source={matchIcon} style={{ width: 24, height: 24 }} />
                 }
                 label="Match"
               />
@@ -72,7 +72,7 @@ export default function TabLayout() {
                 focused={focused}
                 icon={
                   <Image
-                    source={require("../../assets/navbar/profile.png")}
+                    source={profileIcon}
                     style={{ width: 24, height: 24 }}
                   />
                 }
@@ -84,10 +84,7 @@ export default function TabLayout() {
               <CustomTab
                 focused={focused}
                 icon={
-                  <Image
-                    source={require("../../assets/navbar/chat.png")}
-                    style={{ width: 24, height: 24 }}
-                  />
+                  <Image source={chatIcon} style={{ width: 24, height: 24 }} />
                 }
                 label="Message"
               />

@@ -39,10 +39,15 @@ function ProfileCreator() {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const router = useRouter();
-  const { setUserInfo } = useContext(UserContext);
+  const context = useContext(UserContext);
+  //handle the case where usercontext is undefined.
+  if (!context) {
+    return <Text>Loading...</Text>; // This can be changed
+  }
+  const { setUserInfo } = context; // Access user data from context
 
   const handlePickImageAsync = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 1,
     });
