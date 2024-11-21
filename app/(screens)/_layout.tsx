@@ -12,24 +12,23 @@ const CustomTab = ({
 }) => (
   <View
     style={{
-      width: "100%",
-      height: "100%",
+      width: 115,
+      height: 45,
       padding: 15,
-      marginTop:15,
+      marginTop: 25,
       backgroundColor: focused ? "#613EEA" : "#ADD8E6", // Optional: change background color based on focus
       borderRadius: 44,
       flexDirection: "row", // Align items horizontally
       alignItems: "center", // Center vertically
-      justifyContent: "flex-start", // Align logo and text to the left
+      justifyContent: "center", // Align logo and text to the left
     }}
   >
-    
-    {icon} 
+    {icon}
     <Text
       style={{
-        marginLeft: 10, // Space between icon and text
         color: "white",
         fontSize: 12,
+        marginLeft: 12,
         fontFamily: "Tuffy", // Adjust font based on preference
         fontWeight: "700",
       }}
@@ -47,7 +46,6 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "#fff",
           height: 90,
-          
         },
         tabBarItemStyle: {
           margin: 5,
@@ -81,8 +79,7 @@ export default function TabLayout() {
                 label="Profile"
               />
             );
-          } 
-          else if (route.name === "social") {
+          } else if (route.name === "social") {
             return (
               <CustomTab
                 focused={focused}
@@ -102,7 +99,6 @@ export default function TabLayout() {
       <Tabs.Screen name="match" />
       <Tabs.Screen name="social" />
       <Tabs.Screen name="profile" />
-      
     </Tabs>
   );
 }

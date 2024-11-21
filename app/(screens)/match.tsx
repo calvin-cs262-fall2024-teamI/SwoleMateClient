@@ -11,20 +11,22 @@ import {
   TextInput,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select"; // Import the dropdown package
-import { fakeUsers } from "../api/fakedata";
+import { fakeUsers } from "../../api/fakedata";
 import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome for star icons
-import { IUserMatch } from "../api/interfaces";
+import { IUserMatch } from "../../api/interfaces";
 
 function MatchScreen() {
   const [nearbyUsers, setNearbyUsers] = useState(fakeUsers);
-  const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(null); // State for dropdown selection
+  const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(
+    null
+  ); // State for dropdown selection
   const [specificFilter, setSpecificFilter] = useState(""); // State for text input
 
   const handleMatch = (userId: number | string) => {
     setNearbyUsers(prevUsers =>
-      prevUsers.map(user =>
-        user.id === userId
-          ? { ...user, matched: true, pending: true } : user // Set user as matched and pending
+      prevUsers.map(
+        user =>
+          user.id === userId ? { ...user, matched: true, pending: true } : user // Set user as matched and pending
       )
     );
   };
@@ -36,7 +38,7 @@ function MatchScreen() {
 
   // Function to filter users based on selected filter and text input
   const filterUsers = () => {
-    return nearbyUsers.filter((user) => {
+    return nearbyUsers.filter(user => {
       if (!selectedFilter || !specificFilter) return true;
 
       const filterValue = specificFilter.trim().toLowerCase();
@@ -68,14 +70,11 @@ function MatchScreen() {
           }
           return false;
 
-
         default:
           return true;
       }
     });
   };
-
-
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -122,7 +121,10 @@ function MatchScreen() {
                   item.showMore && styles.expandedUserCard, // Change background if expanded
                 ]}
               >
-                <Image source={require("@/assets/SmallerLogo.png")} style={styles.profileImage} />
+                <Image
+                  source={require("@/assets/SmallerLogo.png")}
+                  style={styles.profileImage}
+                />
                 <View style={styles.userInfo}>
                   <Text style={styles.userName}>{item.name}</Text>
                   <Text>Age: {item.age}</Text>
@@ -134,7 +136,9 @@ function MatchScreen() {
                     <View>
                       <Text>City: {item.city}</Text>
                       <Text>{item.experience}</Text>
-                      <Text>{item.isTrainer ? "Type: Trainer" : "Type: Regular"}</Text>
+                      <Text>
+                        {item.isTrainer ? "Type: Trainer" : "Type: Regular"}
+                      </Text>
                     </View>
                   )}
 
@@ -146,7 +150,9 @@ function MatchScreen() {
                       setNearbyUsers([...nearbyUsers]); // Update the state to refresh the component
                     }}
                   >
-                    <Text style={styles.buttonText}>{item.showMore ? "Show Less" : "Read More"}</Text>
+                    <Text style={styles.buttonText}>
+                      {item.showMore ? "Show Less" : "Read More"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
@@ -165,7 +171,8 @@ function MatchScreen() {
                   onPress={() => handleMatch(item.id)}
                 >
                   <Text style={styles.buttonText}>
-                    {item.pending ? "Pending" : "Match"} {/* Change button text based on pending state */}
+                    {item.pending ? "Pending" : "Match"}{" "}
+                    {/* Change button text based on pending state */}
                   </Text>
                 </TouchableOpacity>
 
@@ -206,7 +213,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 5,
     borderRadius: 5,
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   filterTextInput: {
     flex: 1,
