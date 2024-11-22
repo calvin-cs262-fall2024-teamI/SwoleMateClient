@@ -62,7 +62,10 @@ export default function EditAccountDetails() {
           <Text style={styles.errorText}>Passwords do not match</Text>
         )}
 
-        <TouchableOpacity style={styles.updateButton} onPress={handleSaveChanges}>
+        <TouchableOpacity
+          style={styles.updateButton}
+          onPress={handleSaveChanges}
+        >
           <Text style={styles.updateButtonText}>Update Account</Text>
         </TouchableOpacity>
       </ScrollView>

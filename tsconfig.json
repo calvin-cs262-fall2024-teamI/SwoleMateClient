@@ -5,15 +5,13 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "jsx": "react-jsx",
-
+    "jsx": "react-jsx"
   },
   "include": [
-    
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "nativewind-env.d.ts",
+    "nativewind-env.d.ts"
   ]
 }

@@ -277,8 +277,8 @@ function ProfileCreator() {
                       {activePicker === "preferredTime"
                         ? "Preferred Time to Workout"
                         : activePicker === "workoutType"
-                        ? "Workout Type"
-                        : "Experience Level"}
+                          ? "Workout Type"
+                          : "Experience Level"}
                     </Text>
                     <ScrollView
                       contentContainerStyle={styles.modalOptionsContainer}

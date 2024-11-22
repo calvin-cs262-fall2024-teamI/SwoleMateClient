@@ -9,6 +9,7 @@ module.exports = {
     "plugin:react/jsx-runtime",
     "eslint:recommended",
     "plugin:react/recommended",
+    "prettier",
   ],
   plugins: ["react"],
   parserOptions: {
