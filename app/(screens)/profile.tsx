@@ -61,6 +61,9 @@ export default function Profile() {
             <Text style={styles.infoText}>
               Experience Level: {userInfo.experienceLevel || "N/A"}
             </Text>
+            <Text style={styles.infoText}>
+              Rating: {"5"} {/* Hardcoded for now */}
+            </Text>
             <Text style={styles.bioText}>
               {userInfo.personalBio || "No bio available."}
             </Text>
