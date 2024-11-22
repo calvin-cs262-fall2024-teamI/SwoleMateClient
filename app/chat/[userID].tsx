@@ -15,7 +15,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-const MessageItem = ({ message }: { message: any }) => (
+const MessageItem = ({
+  message,
+}: {
+  message: { isSelf: boolean; text: string; time: string };
+}) => (
   <View
     style={[
       styles.messageWrapper,
@@ -49,6 +53,8 @@ const MessageItem = ({ message }: { message: any }) => (
 );
 
 const ChatScreen = () => {
+  // TODO: figure out if this is still needed
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [messages, setMessages] = useState([
     { id: "1", text: "Hi there! How are you?", time: "15:30", isSelf: false },

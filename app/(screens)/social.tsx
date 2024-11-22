@@ -27,7 +27,7 @@ const ChatItem = ({ item }: { item: IChatItem }) => (
       });
     }}
   >
-    <Image source={item.avatar} style={styles.avatar} />
+    <Image source={{ uri: item.avatar }} style={styles.avatar} />
     <View style={styles.chatInfo}>
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.message}>{item.message}</Text>
@@ -85,7 +85,7 @@ const RecentChatsScreen = () => {
       <View style={styles.tabs}>
         {["Matched", "Pending", "Requests"].map((tab, index) => (
           <TouchableOpacity
-            key={(tab, index)}
+            key={`tab-${index}`}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
             onPress={() => setActiveTab(tab)}
           >

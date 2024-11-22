@@ -20,5 +20,5 @@ export interface IChatItem {
   name: string;
   message: string;
   time: string;
-  avatar: any;
+  avatar: string;
 }
