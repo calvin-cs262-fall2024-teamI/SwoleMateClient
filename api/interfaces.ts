@@ -1,5 +1,3 @@
-
-
 export interface IUserMatch {
   id: string;
   name: string;

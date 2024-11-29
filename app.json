@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "SwoleMate",
+    "newArchEnabled": true,
     "slug": "swolemate",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -26,10 +27,14 @@
       "output": "static",
       "favicon": "./assets/favicon.png"
     },
+<<<<<<< HEAD
     "plugins": [
       "expo-router",
       "expo-font"
     ],
+=======
+    "plugins": ["expo-router", "expo-font"],
+>>>>>>> 054137793bb41f5b8edaa84f683304f26ee39513
     "experiments": {
       "typedRoutes": true
     }

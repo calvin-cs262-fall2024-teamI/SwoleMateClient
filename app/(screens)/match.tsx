@@ -11,9 +11,9 @@ import {
   TextInput,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select"; // Import the dropdown package
-import { fakeUsers } from "../api/fakedata";
+import { fakeUsers } from "../../api/fakedata";
 import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome for star icons
-import { IUserMatch } from "../api/interfaces";
+import { IUserMatch } from "../../api/interfaces";
 
 function MatchScreen() {
   const [nearbyUsers, setNearbyUsers] = useState(fakeUsers);
