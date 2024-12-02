@@ -1,4 +1,4 @@
-name: ESLint Check
+name: Prettier Check
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  lint:
-    name: Run ESLint
+  format:
+    name: Run Prettier
     runs-on: ubuntu-latest
 
     steps:
@@ -29,6 +29,7 @@ jobs:
       - name: Verify Node.js version
         run: node -v
 
-      # Run ESLint
-      - name: Run ESLint
-        run: npm run lint
+      # Run Prettier check.
+      # --check: Just checks if the files are properly formatted. It does not change any files.
+      - name: Run Prettier Check
+        run: npm run format:check

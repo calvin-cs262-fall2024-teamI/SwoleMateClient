@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import {
   View,
   Text,
@@ -10,15 +10,23 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { UserContext } from "../../nonapp/UserContext"; // Import UserContext
+import swoleImage from "@/assets/swole.png";
+import placeholderImage from "@/assets/portrait_placeholder.png"; // Import placeholder image
 
 export default function Profile() {
   const router = useRouter();
-  const { userInfo } = useContext(UserContext); // Access user data from context
+  const context = useContext(UserContext);
+  //handle the case where usercontext is undefined.
+  if (!context) {
+    return <Text>Loading...</Text>; // This can be changed
+  }
+  const { userInfo } = context; // Access user data from context
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("@/assets/swole.png")}
+        //
+        source={swoleImage}
         style={styles.background}
         resizeMode="cover"
       >
@@ -30,7 +38,7 @@ export default function Profile() {
             source={
               userInfo.profileImage
                 ? { uri: userInfo.profileImage }
-                : require("@/assets/portrait_placeholder.png")
+                : placeholderImage
             }
             style={styles.profileImage}
           />
