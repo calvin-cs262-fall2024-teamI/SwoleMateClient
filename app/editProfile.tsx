@@ -1,9 +1,9 @@
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Button,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -12,28 +12,50 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  Platform,
   StyleSheet,
 } from "react-native";
+import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { UserContext } from "../nonapp/UserContext";
 
 function EditProfile() {
-  const [firstName, setFirstName] = useState("John");
-  const [lastName, setLastName] = useState("Doe");
-  const [age, setAge] = useState("25");
-  const [heightFt, setHeightFt] = useState("6");
-  const [heightIn, setHeightIn] = useState("2");
-  const [weight, setWeight] = useState("180");
-  const [preferredTime, setPreferredTime] = useState("morning");
-  const [workoutType, setWorkoutType] = useState("cardio");
-  const [experienceLevel, setExperienceLevel] = useState("beginner");
-  const [personalBio, setPersonalBio] = useState("Fitness enthusiast and gym lover.");
-  const [activePicker, setActivePicker] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false);
+  const { userInfo, setUserInfo } = useContext(UserContext); // Retrieve user data from context
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [age, setAge] = useState("");
+  const [heightFt, setHeightFt] = useState("");
+  const [heightIn, setHeightIn] = useState("");
+  const [weight, setWeight] = useState("");
+  const [preferredTime, setPreferredTime] = useState("");
+  const [workoutType, setWorkoutType] = useState("");
+  const [experienceLevel, setExperienceLevel] = useState("");
+  const [personalBio, setPersonalBio] = useState("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [activePicker, setActivePicker] = useState<string | null>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const router = useRouter();
 
+  // Populate fields with existing user info when the component loads
+  useEffect(() => {
+    if (userInfo) {
+      setFirstName(userInfo.firstName || "");
+      setLastName(userInfo.lastName || "");
+      setAge(userInfo.age?.toString() || "");
+      setHeightFt(userInfo.heightFt?.toString() || "");
+      setHeightIn(userInfo.heightIn?.toString() || "");
+      setWeight(userInfo.weight?.toString() || "");
+      setPreferredTime(userInfo.preferredTime || "morning");
+      setWorkoutType(userInfo.workoutType || "cardio");
+      setExperienceLevel(userInfo.experienceLevel || "beginner");
+      setPersonalBio(userInfo.personalBio || "");
+      setProfileImage(userInfo.profileImage || null);
+    }
+  }, [userInfo]);
+
   const handlePickImageAsync = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 1,
     });
@@ -45,290 +67,391 @@ function EditProfile() {
     }
   };
 
-  const handleSelection = (itemValue: any, pickerType: any) => {
-    if (pickerType === "preferredTime") {
+  const handleSelection = (itemValue: string) => {
+    if (activePicker === "preferredTime") {
       setPreferredTime(itemValue);
-    } else if (pickerType === "workoutType") {
+    } else if (activePicker === "workoutType") {
       setWorkoutType(itemValue);
-    } else if (pickerType === "experienceLevel") {
+    } else if (activePicker === "experienceLevel") {
       setExperienceLevel(itemValue);
     }
-    closeModal();
-  };
-
-  const openModal = (pickerType: any) => {
-    setActivePicker(pickerType);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
     setModalVisible(false);
     setActivePicker(null);
   };
 
+  const handleSaveProfile = () => {
+    const updatedProfile = {
+      firstName,
+      lastName,
+      age: Number(age),
+      heightFt: Number(heightFt),
+      heightIn: Number(heightIn),
+      weight: Number(weight),
+      preferredTime,
+      workoutType,
+      experienceLevel,
+      personalBio,
+      profileImage,
+    };
+
+    setUserInfo(updatedProfile); // Save the updated profile
+    alert("Profile updated successfully!");
+    router.push("/match"); // Navigate to another screen
+  };
+
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.header}>
-          <Image
-            source={require("@/assets/SmallerLogo.png")}
-            style={styles.logo}
-          />
-          <Text style={styles.title}>Edit Your Profile</Text>
-        </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+          <ScrollView contentContainerStyle={styles.container}>
+            <View style={styles.header}>
+              <Image
+                source={require("@/assets/SmallerLogo.png")}
+                style={styles.logo}
+              />
+              <Text style={styles.title}>Edit Your Profile</Text>
+            </View>
 
-        <View style={styles.profileImageContainer}>
-          <TouchableOpacity onPress={handlePickImageAsync} style={styles.selectProfileImageBox}>
-            <Text style={styles.selectProfileText}>Select Profile Image</Text>
-          </TouchableOpacity>
-          {profileImage && (
-            <Image
-              source={{ uri: profileImage }}
-              style={styles.profileImage}
-            />
-          )}
-        </View>
+            <View style={styles.profileImageSection}>
+              {profileImage && (
+                <Image
+                  source={{ uri: profileImage }}
+                  style={styles.profileImage}
+                />
+              )}
+              <TouchableOpacity
+                onPress={handlePickImageAsync}
+                style={styles.selectProfileImageBox}
+              >
+                <Text style={styles.selectProfileText}>
+                  {profileImage
+                    ? "Change Profile Image"
+                    : "Select Profile Image"}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.formContainer}>
-          <Text style={styles.label}>First Name</Text>
-          <TextInput
-            placeholder="First Name"
-            value={firstName}
-            onChangeText={setFirstName}
-            style={styles.input}
-          />
-          <Text style={styles.label}>Last Name</Text>
-          <TextInput
-            placeholder="Last Name"
-            value={lastName}
-            onChangeText={setLastName}
-            style={styles.input}
-          />
-          <Text style={styles.label}>Age</Text>
-          <TextInput
-            placeholder="Age"
-            value={age}
-            onChangeText={setAge}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-          <Text style={styles.label}>Height (Feet/Inches)</Text>
-          <View style={styles.heightContainer}>
-            <TextInput
-              placeholder="Feet"
-              value={heightFt}
-              onChangeText={setHeightFt}
-              keyboardType="numeric"
-              style={styles.heightInput}
-            />
-            <TextInput
-              placeholder="Inches"
-              value={heightIn}
-              onChangeText={setHeightIn}
-              keyboardType="numeric"
-              style={styles.heightInput}
-            />
-          </View>
-          <Text style={styles.label}>Weight (lbs)</Text>
-          <TextInput
-            placeholder="Weight (lbs)"
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="numeric"
-            style={styles.input}
-          />
-          <Text style={styles.label}>Personal Bio</Text>
-          <TextInput
-            placeholder="Write something about yourself..."
-            value={personalBio}
-            onChangeText={setPersonalBio}
-            style={styles.bioInput}
-            multiline
-            numberOfLines={4}
-          />
+            <View style={styles.formContainer}>
+              <Text style={styles.label}>First Name</Text>
+              <TextInput
+                placeholder="First Name"
+                value={firstName}
+                onChangeText={setFirstName}
+                style={styles.input}
+              />
 
-          <Text style={styles.pickerLabel}>Preferred Time to Workout:</Text>
-          <TouchableOpacity
-            style={styles.pickerContainer}
-            onPress={() => openModal("preferredTime")}
-          >
-            <Text style={styles.pickerText}>
-              {preferredTime.charAt(0).toUpperCase() + preferredTime.slice(1)}
-            </Text>
-          </TouchableOpacity>
+              <Text style={styles.label}>Last Name</Text>
+              <TextInput
+                placeholder="Last Name"
+                value={lastName}
+                onChangeText={setLastName}
+                style={styles.input}
+              />
 
-          <Text style={styles.pickerLabel}>Workout Type:</Text>
-          <TouchableOpacity
-            style={styles.pickerContainer}
-            onPress={() => openModal("workoutType")}
-          >
-            <Text style={styles.pickerText}>
-              {workoutType.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())}
-            </Text>
-          </TouchableOpacity>
+              <Text style={styles.label}>Age</Text>
+              <TextInput
+                placeholder="Age"
+                value={age}
+                onChangeText={setAge}
+                keyboardType="numeric"
+                style={styles.input}
+              />
 
-          <Text style={styles.pickerLabel}>Experience Level:</Text>
-          <TouchableOpacity
-            style={styles.pickerContainer}
-            onPress={() => openModal("experienceLevel")}
-          >
-            <Text style={styles.pickerText}>
-              {experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)}
-            </Text>
-          </TouchableOpacity>
-
-          <Modal
-            transparent={true}
-            visible={isModalVisible}
-            onRequestClose={closeModal}
-            animationType="slide"
-          >
-            <TouchableWithoutFeedback onPress={closeModal}>
-              <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-                <View style={{ backgroundColor: "white", padding: 20, borderRadius: 10, width: "80%", alignItems: "center" }}>
-                  <Button title="Close" onPress={closeModal} />
-                </View>
+              <Text style={styles.label}>Height (Feet/Inches)</Text>
+              <View style={styles.heightContainer}>
+                <TextInput
+                  placeholder="Feet"
+                  value={heightFt}
+                  onChangeText={setHeightFt}
+                  keyboardType="numeric"
+                  style={styles.heightInput}
+                />
+                <TextInput
+                  placeholder="Inches"
+                  value={heightIn}
+                  onChangeText={setHeightIn}
+                  keyboardType="numeric"
+                  style={styles.heightInput}
+                />
               </View>
-            </TouchableWithoutFeedback>
-          </Modal>
 
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Save Profile"
-              onPress={() => router.push("/match")}
-              color="white"
-            />
-          </View>
-        </View>
-      </ScrollView>
+              <Text style={styles.label}>Weight (lbs)</Text>
+              <TextInput
+                placeholder="Weight (lbs)"
+                value={weight}
+                onChangeText={setWeight}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+
+              <Text style={styles.label}>Personal Bio</Text>
+              <TextInput
+                placeholder="Write something about yourself..."
+                value={personalBio}
+                onChangeText={setPersonalBio}
+                style={styles.bioInput}
+                multiline
+              />
+
+              <Text style={styles.label}>Preferred Time to Workout:</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setActivePicker("preferredTime");
+                  setModalVisible(true);
+                }}
+                style={styles.pickerContainer}
+              >
+                <Text style={styles.pickerText}>
+                  {preferredTime.charAt(0).toUpperCase() +
+                    preferredTime.slice(1)}
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.label}>Workout Type:</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setActivePicker("workoutType");
+                  setModalVisible(true);
+                }}
+                style={styles.pickerContainer}
+              >
+                <Text style={styles.pickerText}>
+                  {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
+                </Text>
+              </TouchableOpacity>
+
+              <Text style={styles.label}>Experience Level:</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setActivePicker("experienceLevel");
+                  setModalVisible(true);
+                }}
+                style={styles.pickerContainer}
+              >
+                <Text style={styles.pickerText}>
+                  {experienceLevel.charAt(0).toUpperCase() +
+                    experienceLevel.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Modal
+              transparent
+              visible={isModalVisible}
+              animationType="slide"
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                <View style={styles.modalBackground}>
+                  <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>
+                      {activePicker === "preferredTime"
+                        ? "Preferred Time to Workout"
+                        : activePicker === "workoutType"
+                          ? "Workout Type"
+                          : "Experience Level"}
+                    </Text>
+                    <ScrollView
+                      contentContainerStyle={styles.modalOptionsContainer}
+                    >
+                      {activePicker === "preferredTime" &&
+                        ["Morning", "Afternoon", "Evening"].map(item => (
+                          <TouchableOpacity
+                            key={item}
+                            onPress={() => handleSelection(item.toLowerCase())}
+                            style={styles.modalOption}
+                          >
+                            <Text style={styles.modalOptionText}>{item}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      {activePicker === "workoutType" &&
+                        ["Cardio", "Strength", "Hypertrophy"].map(item => (
+                          <TouchableOpacity
+                            key={item}
+                            onPress={() => handleSelection(item.toLowerCase())}
+                            style={styles.modalOption}
+                          >
+                            <Text style={styles.modalOptionText}>{item}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      {activePicker === "experienceLevel" &&
+                        ["Beginner", "Intermediate", "Advanced"].map(item => (
+                          <TouchableOpacity
+                            key={item}
+                            onPress={() => handleSelection(item.toLowerCase())}
+                            style={styles.modalOption}
+                          >
+                            <Text style={styles.modalOptionText}>{item}</Text>
+                          </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                    <Button
+                      title="Close"
+                      onPress={() => setModalVisible(false)}
+                      color="#4B0082"
+                    />
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Save Profile"
+                onPress={handleSaveProfile}
+                color="white"
+              />
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-  scrollView: {
     flexGrow: 1,
     padding: 20,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    marginRight: 10,
-    borderRadius: 10,
-  },
-  title: {
-    fontSize: 24,
-    color: "black",
-    fontWeight: "bold",
-  },
-  profileImageContainer: {
-    flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
+  logo: {
+    width: 60,
+    height: 60,
+  },
+  title: {
+    fontSize: 24,
+    color: "#4B0082",
+    marginTop: 10,
+  },
+  profileImageSection: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 10,
+  },
   selectProfileImageBox: {
-    padding: 8,
+    padding: 10,
     borderColor: "#6A5ACD",
-    borderWidth: 2,
-    borderRadius: 8,
+    borderWidth: 1,
+    borderRadius: 5,
     backgroundColor: "#E6E6FA",
   },
   selectProfileText: {
-    color: "black",
-    textAlign: "center",
-    fontSize: 15,
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-    marginLeft: 10,
+    color: "#4B0082",
+    fontSize: 16,
   },
   formContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "5%",
+    marginTop: 10,
   },
   label: {
     fontSize: 14,
-    color: "black",
+    color: "#333",
     marginBottom: 5,
-    alignSelf: "flex-start",
-    paddingLeft: "10%",
   },
   input: {
     height: 40,
-    backgroundColor: "#FFF",
-    borderRadius: 5,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    borderColor: "#6A5ACD",
-    borderWidth: 2,
-    width: "80%",
-  },
-  bioInput: {
-    height: 100,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F0F0F5",
     borderRadius: 5,
     paddingHorizontal: 10,
-    paddingTop: 10,
     borderColor: "#6A5ACD",
-    borderWidth: 2,
-    textAlignVertical: "top",
+    borderWidth: 1,
     marginBottom: 15,
-    width: "80%",
   },
   heightContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
-    width: "80%",
   },
   heightInput: {
-    height: 40,
-    backgroundColor: "#FFF",
-    borderRadius: 5,
     width: "48%",
+    height: 40,
+    backgroundColor: "#F0F0F5",
+    borderRadius: 5,
     paddingHorizontal: 10,
     borderColor: "#6A5ACD",
-    borderWidth: 2,
+    borderWidth: 1,
   },
-  pickerLabel: {
-    fontSize: 14,
-    color: "black",
-    marginBottom: 5,
-    alignSelf: "flex-start",
-    paddingLeft: "10%",
+  bioInput: {
+    height: 80,
+    backgroundColor: "#F0F0F5",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    borderColor: "#6A5ACD",
+    borderWidth: 1,
+    textAlignVertical: "top",
   },
   pickerContainer: {
-    backgroundColor: "#E6E6FA",
-    borderRadius: 8,
     padding: 10,
-    marginBottom: 20,
-    width: "80%",
+    backgroundColor: "#E6E6FA",
+    borderRadius: 5,
     borderColor: "#6A5ACD",
-    borderWidth: 2,
+    borderWidth: 1,
+    marginBottom: 15,
   },
   pickerText: {
-    textAlign: "center",
     fontSize: 16,
-    color: "black",
+    color: "#4B0082",
+    textAlign: "center",
   },
   buttonContainer: {
-    backgroundColor: "#6A5ACD",
-    padding: 10,
-    width: "60%",
-    borderRadius: 8,
     marginTop: 20,
+    backgroundColor: "#6A5ACD",
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalOptionsContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalOption: {
+    padding: 15,
+    marginVertical: 5,
+    width: "100%",
+    backgroundColor: "#E6E6FA",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: "#4B0082",
+    textAlign: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
   },
 });
 

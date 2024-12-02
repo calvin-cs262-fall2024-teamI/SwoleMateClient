@@ -1,10 +1,13 @@
+import coupleWorking from "@/assets/couple_working.jpg";
+import gymBackground from "@/assets/gym_background.jpg";
+import smallerLogo from "@/assets/SmallerLogo.png";
+import twoPeopleWorkingOut from "@/assets/two_people_working_out.jpg";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState, useContext } from "react";
 import {
   Button,
   Image,
   Keyboard,
-  StyleSheet,
   Text,
   TextInput,
   TouchableWithoutFeedback,
@@ -12,16 +15,27 @@ import {
 } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
 import { AuthContext } from "./authentication/AuthContext";
+import styles from "./WelcomeScreenStyles";
+import { ImageSourcePropType } from "react-native";
 
-const RenderSlide = ({ item }: { item: any }): JSX.Element => (
-  <View style={styles.slideContainer}>
-    <Image source={item.image} style={styles.image} />
-    <View style={styles.overlay} />
-    <Text style={styles.text}>{item.text}</Text>
-  </View>
-);
+type Slide = {
+  key: string;
+  text: string;
+  image: ImageSourcePropType;
+};
 
-function WelcomeScreen() {
+const RenderSlide = ({ item }: { item: Slide }): JSX.Element => {
+  return (
+    <View style={styles.slideContainer}>
+      <Image source={item.image} style={styles.image} />
+      <View style={styles.overlay} />
+      <Text style={styles.text}>{item.text}</Text>
+    </View>
+  );
+};
+
+
+const WelcomeScreen: React.FC = () => {
   const router = useRouter();
 
   // Get auth context and verify it's not undefined
@@ -38,23 +52,24 @@ function WelcomeScreen() {
   const [passwordValid, setPasswordValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
+
   const sliderRef = useRef<AppIntroSlider | null>(null);
 
-  const slides = [
+  const slides: Slide[] = [
     {
       key: "slide1",
       text: "Meet a new gym partner",
-      image: require("@/assets/gym_background.jpg"),
+      image: gymBackground,
     },
     {
       key: "slide2",
       text: "Get fit together",
-      image: require("@/assets/two_people_working_out.jpg"),
+      image: twoPeopleWorkingOut,
     },
     {
       key: "slide3",
       text: "Make a new friend",
-      image: require("@/assets/couple_working.jpg"),
+      image: coupleWorking,
     },
   ];
 
@@ -66,7 +81,7 @@ function WelcomeScreen() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   const handleRegister = () => {
     router.push("/profile-creator");
@@ -86,6 +101,13 @@ function WelcomeScreen() {
       } catch (error) {
         setErrorMessage((error as Error).message || "Login failed, please try again.");
       }
+
+      // const rsp = await verifyLogin({ emailAddress: email, password });
+      // if (rsp.success) {
+      //   router.push("/match");
+      // }
+      // navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
+
     } else {
       setErrorMessage("Please fill in both fields.");
     }
@@ -104,7 +126,7 @@ function WelcomeScreen() {
 
         <View style={styles.formContainer}>
           <Image
-            source={require("@/assets/SmallerLogo.png")}
+            source={smallerLogo}
             style={{
               width: 85,
               height: 85,
@@ -119,12 +141,23 @@ function WelcomeScreen() {
               placeholder="Email"
               value={email}
               onChangeText={setEmail}
+              onEndEditing={() => {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                setEmailValid(emailRegex.test(email));
+              }}
               style={[styles.input, !emailValid && styles.invalidInput]}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <TextInput
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
+              onEndEditing={() => {
+                const passwordRegex = /^.{8,}$/;
+                setPasswordValid(passwordRegex.test(password));
+              }}
               secureTextEntry
               style={[styles.input, !passwordValid && styles.invalidInput]}
             />
@@ -143,83 +176,8 @@ function WelcomeScreen() {
       </View>
     </TouchableWithoutFeedback>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  formContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "5%",
-  },
-  title: {
-    fontSize: 24,
-    color: "white",
-    marginBottom: "10%",
-    zIndex: 1,
-  },
-  inputContainer: {
-    width: "80%",
-  },
-  input: {
-    height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 5,
-    marginBottom: "8%",
-    paddingHorizontal: 10,
-    borderColor: "blue",
-    borderWidth: 2,
-  },
-  invalidInput: {
-    borderColor: "red",
-  },
-  buttonContainer: {
-    width: "60%",
-    color: "black",
-    marginTop: "3%",
-    padding: "1%",
-    borderRadius: 5,
-    backgroundColor: "blue",
-  },
-  slideContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    resizeMode: "cover",
-  },
-  text: {
-    position: "absolute",
-    bottom: "55%",
-    color: "white",
-    fontSize: 16,
-    textAlign: "center",
-    zIndex: 1,
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  errorText: {
-    color: "red",
-    marginBottom: 10,
-  },
-});
 
 
 export default WelcomeScreen;

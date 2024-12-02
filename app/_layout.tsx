@@ -8,11 +8,12 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
+import "../global.css";
 
 import { AuthProvider } from "./authentication/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { UserProvider } from "../nonapp/UserContext"; // Import the UserProvider
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -35,7 +36,9 @@ export default function RootLayout() {
   }
 
   return (
+
     <AuthProvider>
+
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -49,5 +52,6 @@ export default function RootLayout() {
         </Stack>
       </ThemeProvider>
     </AuthProvider>
+
   );
 }

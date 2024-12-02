@@ -2,183 +2,80 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  Button,
   FlatList,
   Image,
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
   SafeAreaView,
+  TextInput,
 } from "react-native";
-
-interface User {
-  id: string;
-  name: string;
-  age: number;
-  height: string;
-  weight: string;
-  matched?: boolean;
-  pending?: boolean;
-}
+import RNPickerSelect from "react-native-picker-select"; // Import the dropdown package
+import { fakeUsers } from "../../api/fakedata";
+import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome for star icons
+import { IUserMatch } from "../../api/interfaces";
 
 function MatchScreen() {
-  // Sample matches to display on the screen - will make these iterative/changeable once the profile is fully done.
-  const [nearbyUsers, setNearbyUsers] = useState<User[]>([
-    { id: "1", name: "John Doe", age: 25, height: "6 ft", weight: "180 lbs" },
-    {
-      id: "2",
-      name: "Jane Doe",
-      age: 28,
-      height: "5 ft 6 in",
-      weight: "150 lbs",
-      pending: false
-    },
-    {
-      id: "3",
-      name: "Beyonce",
-      age: 22,
-      height: "5 ft 7 in",
-      weight: "137 lbs",
-      pending: false
-    },
-    {
-      id: "4",
-      name: "Tom Cruise",
-      age: 27,
-      height: "5 ft 7 in",
-      weight: "201 lbs",
-      pending: false
-    },
-    {
-      id: "5",
-      name: "Jennifer Lopez",
-      age: 24,
-      height: "5 ft 5 in",
-      weight: "120 lbs",
-      pending: false
-    },
-    {
-      id: "6",
-      name: "Brad Pitt",
-      age: 30,
-      height: "6 ft 0 in",
-      weight: "203 lbs",
-      pending: false
-    },
-    {
-      id: "7",
-      name: "Carrie Underwood",
-      age: 26,
-      height: "5 ft 3 in",
-      weight: "117 lbs",
-    },
-    {
-      id: "8",
-      name: "Travis Kelce",
-      age: 29,
-      height: "6 ft 5 in",
-      weight: "250 lbs",
-    },
-    {
-      id: "9",
-      name: "Jennifer Lawrence",
-      age: 23,
-      height: "5 ft 9 in",
-      weight: "138 lbs",
-    },
-    {
-      id: "10",
-      name: "Patrick Mahomes",
-      age: 31,
-      height: "6 ft 2 in",
-      weight: "225 lbs",
-    },
-    {
-      id: "11",
-      name: "Taylor Swift",
-      age: 20,
-      height: "5 ft 11 in",
-      weight: "119 lbs",
-    },
-    {
-      id: "12",
-      name: "Sean John Combs",
-      age: 27,
-      height: "5 ft 10 in",
-      weight: "190 lbs",
-    },
-    {
-      id: "13",
-      name: "Ariana Grande",
-      age: 25,
-      height: "5 ft 0 in",
-      weight: "104 lbs",
-    },
-    {
-      id: "14",
-      name: "Christopher Clark",
-      age: 28,
-      height: "6 ft 1 in",
-      weight: "185 lbs",
-    },
-    {
-      id: "15",
-      name: "Samantha Lewis",
-      age: 22,
-      height: "5 ft 2 in",
-      weight: "120 lbs",
-    },
-    {
-      id: "16",
-      name: "William Walker",
-      age: 26,
-      height: "6 ft 3 in",
-      weight: "210 lbs",
-    },
-    {
-      id: "17",
-      name: "Emily Hall",
-      age: 24,
-      height: "5 ft 5 in",
-      weight: "145 lbs",
-    },
-    {
-      id: "18",
-      name: "Joshua Young",
-      age: 29,
-      height: "5 ft 8 in",
-      weight: "165 lbs",
-    },
-    {
-      id: "19",
-      name: "Isabella King",
-      age: 23,
-      height: "5 ft 4 in",
-      weight: "130 lbs",
-    },
-    {
-      id: "20",
-      name: "Matthew Scott",
-      age: 30,
-      height: "6 ft",
-      weight: "195 lbs",
-    },
-  ]);
+  const [nearbyUsers, setNearbyUsers] = useState(fakeUsers);
+  const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(
+    null
+  ); // State for dropdown selection
+  const [specificFilter, setSpecificFilter] = useState(""); // State for text input
 
-  const handleMatch = (userId: string) => {
-    setNearbyUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === userId
-          ? { ...user, matched: true, pending: true } // Set both matched and pending to true
-          : user
+  const handleMatch = (userId: number | string) => {
+    setNearbyUsers(prevUsers =>
+      prevUsers.map(
+        user =>
+          user.id === userId ? { ...user, matched: true, pending: true } : user // Set user as matched and pending
       )
     );
-  };  
+  };
 
-  const handleIgnore = (userId: string) => {
-    setNearbyUsers((prevUsers) =>
-      prevUsers.filter((user) => user.id !== userId)
-    );
+  //TODO This should be type number? Update interfaces.ts and fakedata.ts field types
+  const handleIgnore = (userId: number | string) => {
+    setNearbyUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+  };
+
+  // Function to filter users based on selected filter and text input
+  const filterUsers = () => {
+    return nearbyUsers.filter(user => {
+      if (!selectedFilter || !specificFilter) return true;
+
+      const filterValue = specificFilter.trim().toLowerCase();
+
+      switch (selectedFilter) {
+        case "age": {
+          const ageFilter = parseInt(specificFilter, 10);
+          return user.age === ageFilter;
+        }
+
+        case "city":
+          return user.city.toLowerCase().includes(filterValue);
+
+        case "gym":
+          return user.gym.toLowerCase().includes(filterValue);
+
+        case "rating": {
+          const ratingFilter = parseFloat(specificFilter);
+          return user.rating >= ratingFilter; // Filter for rating equal or above
+        }
+
+        case "experience":
+          return user.experience.toLowerCase().includes(filterValue);
+
+        case "isTrainer":
+          // Check for "trainer" or "regular" with case-insensitive comparison
+          if (filterValue === "trainer") {
+            return user.isTrainer;
+          } else if (filterValue === "regular") {
+            return !user.isTrainer;
+          }
+          return false;
+
+        default:
+          return true;
+      }
+    });
   };
 
   return (
@@ -189,17 +86,41 @@ function MatchScreen() {
         resizeMode="cover"
       >
         <View style={styles.container}>
-          <Text style={styles.title}>Match Screen</Text>
+          {/* Removed Match Screen title */}
+
+          {/* Filter container for dropdown and text input */}
+          <View style={styles.filterContainer}>
+            <RNPickerSelect
+              placeholder={{ label: "Filter by: ", value: null }}
+              onValueChange={value => setSelectedFilter(value)}
+              items={[
+                { label: "City", value: "city" },
+                { label: "Age", value: "age" },
+                { label: "Gym", value: "gym" },
+                { label: "Rating", value: "rating" },
+                { label: "Regular or Trainer", value: "isTrainer" },
+                { label: "Experience", value: "experience" },
+              ]}
+              style={pickerSelectStyles}
+            />
+            <TextInput
+              style={styles.filterTextInput}
+              placeholder="Enter Value" // Updated placeholder text
+              value={specificFilter}
+              onChangeText={text => setSpecificFilter(text)}
+            />
+          </View>
 
           {/* List of nearby users */}
           <FlatList
-            data={nearbyUsers}
-            keyExtractor={(item) => item.id}
+            data={filterUsers()}
+            keyExtractor={item => item.id.toString()}
             renderItem={({ item }) => (
               <View
                 style={[
                   styles.userCard,
-                  item.matched && styles.matchedUserCard, // Apply green background if matched
+                  //item.matched && styles.matchedUserCard,
+                  item.showMore && styles.expandedUserCard, // Change background if expanded
                 ]}
               >
                 <Image
@@ -209,31 +130,64 @@ function MatchScreen() {
                 <View style={styles.userInfo}>
                   <Text style={styles.userName}>{item.name}</Text>
                   <Text>Age: {item.age}</Text>
-                  <Text>Height: {item.height}</Text>
-                  <Text>Weight: {item.weight}</Text>
-                </View>
+                  <Text>{item.typeOfWorkout}</Text>
+                  <Text>{item.gym}</Text>
 
-                <View style={styles.buttonGroup}>
-                {item.matched ? (
-                  <TouchableOpacity style={styles.pendingButton}>
+                  {/* Conditional rendering of additional user info */}
+                  {item.showMore && (
+                    <View>
+                      <Text>City: {item.city}</Text>
+                      <Text>{item.experience}</Text>
+                      <Text>
+                        {item.isTrainer ? "Type: Trainer" : "Type: Regular"}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* "Read More" button */}
+                  <TouchableOpacity
+                    style={styles.readMoreButton}
+                    onPress={() => {
+                      item.showMore = !item.showMore; // Toggle visibility
+                      setNearbyUsers([...nearbyUsers]); // Update the state to refresh the component
+                    }}
+                  >
                     <Text style={styles.buttonText}>
-                      {item.pending ? "Pending" : "Message"} {/* Show "Pending" if pending is true */}
+                      {item.showMore ? "Show Less" : "Read More"}
                     </Text>
                   </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.matchButton}
-                    onPress={() => handleMatch(item.id)}
-                  >
-                    <Text style={styles.buttonText}>Match</Text>
-                  </TouchableOpacity>
-                )}
-                  <TouchableOpacity
-                    style={styles.ignoreButton}
-                    onPress={() => handleIgnore(item.id)}
-                  >
-                    <Text style={styles.buttonText}>Ignore</Text>
-                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.ignoreButton}
+                  onPress={() => handleIgnore(item.id)}
+                >
+                  <Text style={styles.buttonText}>X</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    //styles.matchButton,
+                    item.pending ? styles.pendingButton : styles.defaultButton, // Change style based on pending state
+                  ]}
+                  onPress={() => handleMatch(item.id)}
+                >
+                  <Text style={styles.buttonText}>
+                    {item.pending ? "Pending" : "Match"}{" "}
+                    {/* Change button text based on pending state */}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Display rating as stars in the bottom left corner */}
+                <View style={styles.starContainer}>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <Icon
+                      key={index}
+                      name="star"
+                      size={12}
+                      color={index < item.rating ? "#FFD700" : "#ccc"} // Gold for filled stars, gray for empty
+                    />
+                  ))}
                 </View>
               </View>
             )}
@@ -244,7 +198,7 @@ function MatchScreen() {
   );
 }
 
-// The stylesheet for the MatchScreen portion of the app.
+// Stylesheet for MatchScreen
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -253,74 +207,123 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Slightly transparent white background for consistency
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "black",
+  filterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: "transparent",
+  },
+  filterTextInput: {
+    flex: 1,
+    padding: 8,
+    borderRadius: 5,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    marginLeft: 5, // Add some space between the dropdown and text input
+    backgroundColor: "transparent",
+    height: 40, // Set a fixed height
   },
   userCard: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
-    marginVertical: 10,
-    borderColor: "blue",
-    borderWidth: 2,
+    padding: 10,
+    marginVertical: 5,
+    borderColor: "#ccc",
+    borderWidth: 1,
     borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#b3d9ff",
+    position: "relative",
+    justifyContent: "space-between", // Adjusting the layout
   },
-  matchedUserCard: {
-    backgroundColor: "rgba(255, 165, 0, 0.6)", // Light transparent orange
+  expandedUserCard: {
+    backgroundColor: "#e6e6ff", // Background color when expanded
   },
   userName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "bold",
-    color: "black",
-    marginBottom: 5,
+    color: "#333",
   },
   userInfo: {
     flex: 1,
     paddingLeft: 10,
   },
-  buttonGroup: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 10,
   },
-  matchButton: {
-    backgroundColor: "green",
-    padding: 10,
+  defaultButton: {
+    backgroundColor: "green", // Green color for the button when not pending
+    width: 100, // Set width for Match button
+    paddingVertical: 4, // Reduced padding for size adjustment
+    paddingHorizontal: 8, // Reduced padding for size adjustment
     borderRadius: 5,
-    marginRight: 5, // Space between Match and Ignore buttons
-  },
-  ignoreButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-  },
-  messageButton: {
-    backgroundColor: "blue",
-    padding: 10,
-    borderRadius: 5,
+    alignItems: "center", // Center text
   },
   pendingButton: {
-    backgroundColor: "orange",
-    padding: 10,
+    backgroundColor: "blue", // Blue color for the button when pending
+    paddingVertical: 4, // Reduced padding for size adjustment
+    paddingHorizontal: 8, // Reduced padding for size adjustment
     borderRadius: 5,
-  },  
+    width: 100, // Set width for Pending button
+    alignItems: "center", // Center text
+  },
+  ignoreButton: {
+    backgroundColor: "#ff4d4d",
+    width: 25,
+    height: 25,
+    borderRadius: 12.5,
+    position: "absolute",
+    top: 10,
+    right: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  readMoreButton: {
+    backgroundColor: "#007bff", // Blue color for the button
+    paddingVertical: 4, // Reduced padding for size adjustment
+    paddingHorizontal: 8, // Reduced padding for size adjustment
+    borderRadius: 5,
+    marginTop: 10,
+    width: 100, // Set width for Read More button
+    alignItems: "center", // Center text
+  },
   buttonText: {
     color: "white",
-    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 12,
   },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
+  starContainer: {
+    position: "absolute",
+    bottom: 5,
+    left: 13,
+    flexDirection: "row",
   },
 });
+
+// PickerSelect styles
+const pickerSelectStyles = {
+  inputIOS: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    color: "#000",
+    width: 150,
+  },
+  inputAndroid: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    color: "#000",
+    width: 150,
+  },
+};
 
 export default MatchScreen;

@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 
 export default function EditAccountDetails() {
@@ -52,7 +51,7 @@ export default function EditAccountDetails() {
           placeholder="Confirm New Password"
           secureTextEntry
           value={confirmPassword}
-          onChangeText={(text) => {
+          onChangeText={text => {
             setConfirmPassword(text);
             setPasswordMatch(newPassword === text);
           }}
@@ -62,7 +61,10 @@ export default function EditAccountDetails() {
           <Text style={styles.errorText}>Passwords do not match</Text>
         )}
 
-        <TouchableOpacity style={styles.updateButton} onPress={handleSaveChanges}>
+        <TouchableOpacity
+          style={styles.updateButton}
+          onPress={handleSaveChanges}
+        >
           <Text style={styles.updateButtonText}>Update Account</Text>
         </TouchableOpacity>
       </ScrollView>
