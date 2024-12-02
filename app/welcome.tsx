@@ -1,3 +1,8 @@
+import coupleWorking from "@/assets/couple_working.jpg";
+import gymBackground from "@/assets/gym_background.jpg";
+import smallerLogo from "@/assets/SmallerLogo.png";
+import twoPeopleWorkingOut from "@/assets/two_people_working_out.jpg";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -9,13 +14,7 @@ import {
   View,
 } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
-import { useRouter } from "expo-router";
 import styles from "./WelcomeScreenStyles";
-import gymBackground from "@/assets/gym_background.jpg";
-import twoPeopleWorkingOut from "@/assets/two_people_working_out.jpg";
-import coupleWorking from "@/assets/couple_working.jpg";
-import smallerLogo from "@/assets/SmallerLogo.png";
-import { verifyLogin } from "../api";
 
 import { ImageSourcePropType } from "react-native";
 

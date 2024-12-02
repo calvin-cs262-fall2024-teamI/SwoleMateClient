@@ -1,5 +1,3 @@
-
-
 export interface IUserMatch {
   id: string;
   name: string;
@@ -22,5 +20,5 @@ export interface IChatItem {
   name: string;
   message: string;
   time: string;
-  avatar: any;
+  avatar: string;
 }

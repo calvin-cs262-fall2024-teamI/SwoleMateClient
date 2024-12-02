@@ -44,9 +44,10 @@ function MatchScreen() {
       const filterValue = specificFilter.trim().toLowerCase();
 
       switch (selectedFilter) {
-        case "age":
+        case "age": {
           const ageFilter = parseInt(specificFilter, 10);
           return user.age === ageFilter;
+        }
 
         case "city":
           return user.city.toLowerCase().includes(filterValue);
@@ -54,9 +55,10 @@ function MatchScreen() {
         case "gym":
           return user.gym.toLowerCase().includes(filterValue);
 
-        case "rating":
+        case "rating": {
           const ratingFilter = parseFloat(specificFilter);
           return user.rating >= ratingFilter; // Filter for rating equal or above
+        }
 
         case "experience":
           return user.experience.toLowerCase().includes(filterValue);

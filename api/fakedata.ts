@@ -333,7 +333,6 @@ export const fakeUsers: IUserMatch[] = [
   },
 ];
 
-
 export const fakeMatches = [
   {
     id: "1",
