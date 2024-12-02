@@ -4,6 +4,8 @@ import smallerLogo from "@/assets/SmallerLogo.png";
 import twoPeopleWorkingOut from "@/assets/two_people_working_out.jpg";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Button,
   Image,
@@ -83,11 +85,50 @@ const WelcomeScreen: React.FC = () => {
     setPasswordValid(isPasswordValid);
 
     if (isEmailValid && isPasswordValid) {
-      // const rsp = await verifyLogin({ emailAddress: email, password });
-      // if (rsp.success) {
-      //   router.push("/match");
-      // }
-      // navigation.navigate('MatchScreen'); // Navigate to MatchScreen after successful sign in
+      try {
+        const response = await axios.post(
+          "https://swolemate-service.azurewebsites.net/api/auth/login",
+          { emailAddress: email, password },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          const { accessToken, refreshToken } = response.data.data;
+          if (accessToken && refreshToken) {
+            await AsyncStorage.setItem("accessToken", accessToken);
+            await AsyncStorage.setItem("refreshToken", refreshToken);
+            router.push("/match");
+          } else {
+            console.log("Invalid response from server.");
+          }
+        }
+      } catch (error) {
+        console.log("Error during login:", error);
+
+        // Check for specific error codes and set field validity accordingly
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            const statusCode = error.response.status;
+
+            if (statusCode === 500) {
+              // Both email and password are wrong
+              setEmailValid(false);
+              setPasswordValid(false);
+            } else if (statusCode === 401) {
+              // Password is wrong
+              setPasswordValid(false);
+            } else {
+              // For any other errors, reset both fields
+              setEmailValid(false);
+              setPasswordValid(false);
+            }
+          }
+        }
+      }
     } else {
       console.log("Fill the textboxes");
     }
