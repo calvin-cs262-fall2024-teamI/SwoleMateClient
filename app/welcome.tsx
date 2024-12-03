@@ -17,7 +17,6 @@ import {
 } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
 import styles from "./WelcomeScreenStyles";
-
 import { ImageSourcePropType } from "react-native";
 
 type Slide = {
@@ -74,6 +73,9 @@ const WelcomeScreen: React.FC = () => {
   }, [slides.length]);
 
   const handleRegister = () => {
+    //TODO :
+    //dont let user register if an email account or username is already in the database.
+
     router.push("/profile-creator");
   };
 
