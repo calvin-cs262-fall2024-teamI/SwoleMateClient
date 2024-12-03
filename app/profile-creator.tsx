@@ -19,8 +19,12 @@ import {
 } from "react-native";
 import { UserContext } from "../nonapp/UserContext";
 
+// Email validation regex
+const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 function ProfileCreator() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null); // State for email error
   const [password, setPassword] = useState("");
   const [verifyPassword, setVerifyPassword] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(true);
@@ -75,13 +79,76 @@ function ProfileCreator() {
     setActivePicker(pickerType);
     setModalVisible(true);
   };
+  const handleRegister = async () => {
+    const userProfile = {
+      emailAddress: email,
+      password,
+      username,
+      firstName,
+      lastName,
+      age: Number(age),
+      height_feet: Number(heightFt),
+      height_inches: Number(heightIn),
+      weight: Number(weight),
+      gender: null, // Assume gender selection is handled separately
+      profilePictureUrl: null, // Handle image URL if available
+      experienceLevel: null, // Handle experience level
+      bio: personalBio,
+    };
 
+    try {
+      const response = await fetch(
+        "https://swolemate-service.azurewebsites.net/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userProfile),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text(); // Only read once
+        console.error("Error:", errorText);
+        alert(`Error: ${errorText}`); // Show error to user
+        return;
+      }
+
+      // Only attempt to read once:
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Registration Successful! You can now log in.");
+        router.replace("/welcome"); // Navigate to the welcome screen
+      } else {
+        alert("Error: " + (data.message || "Registration failed."));
+      }
+    } catch (error) {
+      console.error("Error registering user:", error);
+      alert("Network Error");
+    }
+  };
+
+  //TODO: Remove all this context stuff in the future, because the profile screen with fetch details from database
   const handleSaveProfile = () => {
+    // Email validation check
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      return; // Stop execution if email is invalid
+    } else {
+      setEmailError(null); // Clear error if valid
+    }
+
     if (!username || !password || !passwordMatch) {
       alert("Please fill in all required fields.");
       return;
     }
-
+    if (!username || !password || !passwordMatch) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+    handleRegister();
     setUserInfo({
       username,
       firstName,
@@ -97,7 +164,7 @@ function ProfileCreator() {
       profileImage,
     });
 
-    router.push("/match");
+    //router.push("/match");
   };
 
   const dismissKeyboard = () => {
@@ -140,6 +207,15 @@ function ProfileCreator() {
             </View>
 
             <View style={styles.formContainer}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                placeholder="Email"
+                value={email}
+                // pass the email in lowercase
+                onChangeText={text => setEmail(text.toLowerCase())}
+                style={styles.input}
+              />
+              {emailError && <Text style={styles.errorText}>{emailError}</Text>}
               <Text style={styles.label}>Username</Text>
               <TextInput
                 placeholder="Username"
@@ -147,7 +223,6 @@ function ProfileCreator() {
                 onChangeText={setUsername}
                 style={styles.input}
               />
-
               <Text style={styles.label}>Password</Text>
               <TextInput
                 placeholder="Password"
@@ -156,7 +231,6 @@ function ProfileCreator() {
                 secureTextEntry
                 style={styles.input}
               />
-
               <Text style={styles.label}>Verify Password</Text>
               <TextInput
                 placeholder="Verify Password"
@@ -171,7 +245,6 @@ function ProfileCreator() {
               {!passwordMatch && (
                 <Text style={styles.errorText}>Passwords do not match</Text>
               )}
-
               <Text style={styles.label}>First Name</Text>
               <TextInput
                 placeholder="First Name"
@@ -194,7 +267,6 @@ function ProfileCreator() {
                 keyboardType="numeric"
                 style={styles.input}
               />
-
               <Text style={styles.label}>Height (Feet/Inches)</Text>
               <View style={styles.heightContainer}>
                 <TextInput
@@ -212,7 +284,6 @@ function ProfileCreator() {
                   style={styles.heightInput}
                 />
               </View>
-
               <Text style={styles.label}>Weight (lbs)</Text>
               <TextInput
                 placeholder="Weight"
@@ -221,7 +292,6 @@ function ProfileCreator() {
                 keyboardType="numeric"
                 style={styles.input}
               />
-
               <Text style={styles.label}>Personal Bio</Text>
               <TextInput
                 placeholder="Write something about yourself"
@@ -230,7 +300,6 @@ function ProfileCreator() {
                 style={styles.bioInput}
                 multiline
               />
-
               <Text style={styles.label}>Preferred Time to Workout:</Text>
               <TouchableOpacity
                 onPress={() => openModal("preferredTime")}
@@ -241,7 +310,6 @@ function ProfileCreator() {
                     preferredTime.slice(1)}
                 </Text>
               </TouchableOpacity>
-
               <Text style={styles.label}>Workout Type:</Text>
               <TouchableOpacity
                 onPress={() => openModal("workoutType")}
@@ -251,7 +319,6 @@ function ProfileCreator() {
                   {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
                 </Text>
               </TouchableOpacity>
-
               <Text style={styles.label}>Experience Level:</Text>
               <TouchableOpacity
                 onPress={() => openModal("experienceLevel")}
