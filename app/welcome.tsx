@@ -16,7 +16,7 @@ import {
   View,
 } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
-import styles from "./WelcomeScreenStyles";
+import styles from "./stylesheets/WelcomeScreenStyles";
 import { ImageSourcePropType } from "react-native";
 
 type Slide = {
