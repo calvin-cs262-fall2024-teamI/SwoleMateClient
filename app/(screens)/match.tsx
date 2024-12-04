@@ -10,72 +10,85 @@ import {
   SafeAreaView,
   TextInput,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select"; // Import the dropdown package
+import { Dropdown } from "react-native-element-dropdown";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { fakeUsers } from "../../api/fakedata";
-import Icon from "react-native-vector-icons/FontAwesome"; // Import FontAwesome for star icons
+import Icon from "react-native-vector-icons/FontAwesome";
 import { IUserMatch } from "../../api/interfaces";
 
 function MatchScreen() {
   const [nearbyUsers, setNearbyUsers] = useState(fakeUsers);
   const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(
     null
-  ); // State for dropdown selection
-  const [specificFilter, setSpecificFilter] = useState(""); // State for text input
+  );
+  const [specificFilter, setSpecificFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [isFocus, setIsFocus] = useState(false);
+
+  const filterOptions: Array<{ label: string; value: keyof IUserMatch }> = [
+    { label: "City", value: "city" },
+    { label: "Age", value: "age" },
+    { label: "Gym", value: "gym" },
+    { label: "Rating", value: "rating" },
+    { label: "Experience", value: "experience" },
+    { label: "Regular or Trainer", value: "isTrainer" },
+  ];
 
   const handleMatch = (userId: number | string) => {
     setNearbyUsers(prevUsers =>
-      prevUsers.map(
-        user =>
-          user.id === userId ? { ...user, matched: true, pending: true } : user // Set user as matched and pending
+      prevUsers.map(user =>
+        user.id === userId ? { ...user, matched: true, pending: true } : user
       )
     );
   };
 
-  //TODO This should be type number? Update interfaces.ts and fakedata.ts field types
   const handleIgnore = (userId: number | string) => {
     setNearbyUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
   };
 
-  // Function to filter users based on selected filter and text input
   const filterUsers = () => {
-    return nearbyUsers.filter(user => {
-      if (!selectedFilter || !specificFilter) return true;
+    let filteredUsers = [...nearbyUsers];
 
+    if (selectedFilter && specificFilter) {
       const filterValue = specificFilter.trim().toLowerCase();
 
-      switch (selectedFilter) {
-        case "age": {
-          const ageFilter = parseInt(specificFilter, 10);
-          return user.age === ageFilter;
-        }
-
-        case "city":
-          return user.city.toLowerCase().includes(filterValue);
-
-        case "gym":
-          return user.gym.toLowerCase().includes(filterValue);
-
-        case "rating": {
-          const ratingFilter = parseFloat(specificFilter);
-          return user.rating >= ratingFilter; // Filter for rating equal or above
-        }
-
-        case "experience":
-          return user.experience.toLowerCase().includes(filterValue);
-
-        case "isTrainer":
-          // Check for "trainer" or "regular" with case-insensitive comparison
-          if (filterValue === "trainer") {
-            return user.isTrainer;
-          } else if (filterValue === "regular") {
-            return !user.isTrainer;
+      filteredUsers = filteredUsers.filter(user => {
+        switch (selectedFilter) {
+          case "age": {
+            const ageFilter = parseInt(specificFilter, 10);
+            return user.age === ageFilter;
           }
-          return false;
+          case "city":
+            return user.city.toLowerCase().includes(filterValue);
+          case "gym":
+            return user.gym.toLowerCase().includes(filterValue);
+          case "rating": {
+            const ratingFilter = parseFloat(specificFilter);
+            return user.rating >= ratingFilter;
+          }
+          case "experience":
+            return user.experience.toLowerCase().includes(filterValue);
+          case "isTrainer":
+            return filterValue === "trainer" ? user.isTrainer : !user.isTrainer;
+          default:
+            return true;
+        }
+      });
+    }
 
-        default:
-          return true;
-      }
-    });
+    if (selectedFilter === "rating") {
+      filteredUsers.sort((a, b) =>
+        sortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
+      );
+    } else if (selectedFilter === "experience") {
+      filteredUsers.sort((a, b) =>
+        sortOrder === "asc"
+          ? a.experience.localeCompare(b.experience)
+          : b.experience.localeCompare(a.experience)
+      );
+    }
+
+    return filteredUsers;
   };
 
   return (
@@ -86,29 +99,50 @@ function MatchScreen() {
         resizeMode="cover"
       >
         <View style={styles.container}>
-          {/* Removed Match Screen title */}
-
           {/* Filter container for dropdown and text input */}
           <View style={styles.filterContainer}>
-            <RNPickerSelect
-              placeholder={{ label: "Filter by: ", value: null }}
-              onValueChange={value => setSelectedFilter(value)}
-              items={[
-                { label: "City", value: "city" },
-                { label: "Age", value: "age" },
-                { label: "Gym", value: "gym" },
-                { label: "Rating", value: "rating" },
-                { label: "Regular or Trainer", value: "isTrainer" },
-                { label: "Experience", value: "experience" },
-              ]}
-              style={pickerSelectStyles}
+            <Dropdown
+              style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+              data={filterOptions}
+              labelField="label"
+              valueField="value"
+              placeholder={!isFocus ? "Filter/Sort by:" : "..."}
+              value={selectedFilter}
+              onFocus={() => setIsFocus(true)}
+              onBlur={() => setIsFocus(false)}
+              onChange={item => {
+                setSelectedFilter(item.value); // item.value is now guaranteed to be keyof IUserMatch
+                setSpecificFilter("");
+                setIsFocus(false);
+              }}
+              renderLeftIcon={() => (
+                <AntDesign
+                  color={isFocus ? "blue" : "black"}
+                  name="Safety"
+                  size={20}
+                />
+              )}
             />
             <TextInput
               style={styles.filterTextInput}
-              placeholder="Enter Value" // Updated placeholder text
+              placeholder="Enter Value"
               value={specificFilter}
               onChangeText={text => setSpecificFilter(text)}
             />
+            {selectedFilter && (
+              <TouchableOpacity
+                style={styles.sortButton}
+                onPress={() =>
+                  setSortOrder(prevOrder =>
+                    prevOrder === "asc" ? "desc" : "asc"
+                  )
+                }
+              >
+                <Text style={styles.buttonText}>
+                  Sort: {sortOrder === "asc" ? "Ascending" : "Descending"}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* List of nearby users */}
@@ -119,8 +153,7 @@ function MatchScreen() {
               <View
                 style={[
                   styles.userCard,
-                  //item.matched && styles.matchedUserCard,
-                  item.showMore && styles.expandedUserCard, // Change background if expanded
+                  item.showMore && styles.expandedUserCard,
                 ]}
               >
                 <Image
@@ -133,7 +166,6 @@ function MatchScreen() {
                   <Text>{item.typeOfWorkout}</Text>
                   <Text>{item.gym}</Text>
 
-                  {/* Conditional rendering of additional user info */}
                   {item.showMore && (
                     <View>
                       <Text>City: {item.city}</Text>
@@ -144,12 +176,11 @@ function MatchScreen() {
                     </View>
                   )}
 
-                  {/* "Read More" button */}
                   <TouchableOpacity
                     style={styles.readMoreButton}
                     onPress={() => {
-                      item.showMore = !item.showMore; // Toggle visibility
-                      setNearbyUsers([...nearbyUsers]); // Update the state to refresh the component
+                      item.showMore = !item.showMore;
+                      setNearbyUsers([...nearbyUsers]);
                     }}
                   >
                     <Text style={styles.buttonText}>
@@ -167,25 +198,22 @@ function MatchScreen() {
 
                 <TouchableOpacity
                   style={[
-                    //styles.matchButton,
-                    item.pending ? styles.pendingButton : styles.defaultButton, // Change style based on pending state
+                    item.pending ? styles.pendingButton : styles.defaultButton,
                   ]}
                   onPress={() => handleMatch(item.id)}
                 >
                   <Text style={styles.buttonText}>
                     {item.pending ? "Pending" : "Match"}{" "}
-                    {/* Change button text based on pending state */}
                   </Text>
                 </TouchableOpacity>
 
-                {/* Display rating as stars in the bottom left corner */}
                 <View style={styles.starContainer}>
                   {Array.from({ length: 5 }, (_, index) => (
                     <Icon
                       key={index}
                       name="star"
                       size={12}
-                      color={index < item.rating ? "#FFD700" : "#ccc"} // Gold for filled stars, gray for empty
+                      color={index < item.rating ? "#FFD700" : "#ccc"}
                     />
                   ))}
                 </View>
@@ -217,15 +245,24 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "transparent",
   },
+  dropdown: {
+    width: 150,
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 8,
+    backgroundColor: "#fff",
+  },
   filterTextInput: {
     flex: 1,
     padding: 8,
     borderRadius: 5,
     borderColor: "#ccc",
     borderWidth: 1,
-    marginLeft: 5, // Add some space between the dropdown and text input
+    marginLeft: 5,
     backgroundColor: "transparent",
-    height: 40, // Set a fixed height
+    height: 40,
   },
   userCard: {
     flexDirection: "row",
@@ -237,10 +274,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#b3d9ff",
     position: "relative",
-    justifyContent: "space-between", // Adjusting the layout
+    justifyContent: "space-between",
   },
   expandedUserCard: {
-    backgroundColor: "#e6e6ff", // Background color when expanded
+    backgroundColor: "#e6e6ff",
   },
   userName: {
     fontSize: 14,
@@ -258,20 +295,20 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   defaultButton: {
-    backgroundColor: "green", // Green color for the button when not pending
-    width: 100, // Set width for Match button
-    paddingVertical: 4, // Reduced padding for size adjustment
-    paddingHorizontal: 8, // Reduced padding for size adjustment
+    backgroundColor: "green",
+    width: 100,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 5,
-    alignItems: "center", // Center text
+    alignItems: "center",
   },
   pendingButton: {
-    backgroundColor: "blue", // Blue color for the button when pending
-    paddingVertical: 4, // Reduced padding for size adjustment
-    paddingHorizontal: 8, // Reduced padding for size adjustment
+    backgroundColor: "blue",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 5,
-    width: 100, // Set width for Pending button
-    alignItems: "center", // Center text
+    width: 100,
+    alignItems: "center",
   },
   ignoreButton: {
     backgroundColor: "#ff4d4d",
@@ -285,13 +322,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   readMoreButton: {
-    backgroundColor: "#007bff", // Blue color for the button
-    paddingVertical: 4, // Reduced padding for size adjustment
-    paddingHorizontal: 8, // Reduced padding for size adjustment
+    backgroundColor: "#007bff",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     borderRadius: 5,
     marginTop: 10,
-    width: 100, // Set width for Read More button
-    alignItems: "center", // Center text
+    width: 100,
+    alignItems: "center",
   },
   buttonText: {
     color: "white",
@@ -304,26 +341,14 @@ const styles = StyleSheet.create({
     left: 13,
     flexDirection: "row",
   },
+  sortButton: {
+    backgroundColor: "#FFA500",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 5,
+    alignItems: "center",
+  },
 });
-
-// PickerSelect styles
-const pickerSelectStyles = {
-  inputIOS: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    color: "#000",
-    width: 150,
-  },
-  inputAndroid: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    color: "#000",
-    width: 150,
-  },
-};
 
 export default MatchScreen;
