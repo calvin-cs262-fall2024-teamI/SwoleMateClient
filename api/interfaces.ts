@@ -13,6 +13,7 @@ export interface IUserMatch {
   isTrainer: boolean;
   matched?: boolean;
   pending?: boolean;
+  reviews?: string[];
 }
 
 export interface IChatItem {
