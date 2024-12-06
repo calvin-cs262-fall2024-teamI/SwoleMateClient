@@ -106,7 +106,7 @@ const WelcomeScreen: React.FC = () => {
             await AsyncStorage.setItem("refreshToken", refreshToken);
             // Update the UserContext with the user ID
             if (context) {
-              context.setUserId(id);
+              context.setUserId(id.toString());
             }
             router.push("/match");
           } else {

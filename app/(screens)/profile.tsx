@@ -20,14 +20,14 @@ interface UserProfile {
   firstName?: string;
   lastName?: string;
   age?: number;
-  heightFt?: number;
-  heightIn?: number;
+  height_feet?: number;
+  height_inches?: number;
   weight?: number;
   preferredTime?: string;
   workoutType?: string;
   experienceLevel?: string;
-  personalBio?: string;
-  profileImage?: string | null;
+  bio?: string;
+  profilePictureUrl?: string | null;
 }
 
 export default function Profile() {
@@ -38,7 +38,6 @@ export default function Profile() {
   //Get the info from database:
   useEffect(() => {
     console.log("User ID:", context?.userId);
-    console.log("Access Token:", AsyncStorage.getItem("accessToken"));
     if (context?.userId) {
       const fetchProfile = async () => {
         try {
@@ -53,7 +52,7 @@ export default function Profile() {
           );
 
           if (response.status === 200) {
-            setProfile(response.data);
+            setProfile(response.data.data);
           }
         } catch (error) {
           console.error("Error fetching profile:", error);
@@ -94,8 +93,8 @@ export default function Profile() {
           {/* Display profile image or placeholder */}
           <Image
             source={
-              profile.profileImage
-                ? { uri: profile.profileImage }
+              profile.profilePictureUrl
+                ? { uri: profile.profilePictureUrl }
                 : placeholderImage
             }
             style={styles.profileImage}
@@ -111,8 +110,8 @@ export default function Profile() {
             </Text>
             <Text style={styles.infoText}>
               Height:{" "}
-              {profile.heightFt && profile.heightIn
-                ? `${profile.heightFt} ft ${profile.heightIn} in`
+              {profile.height_feet && profile.height_inches
+                ? `${profile.height_feet} ft ${profile.height_inches} in`
                 : "N/A"}
             </Text>
             <Text style={styles.infoText}>
@@ -131,7 +130,7 @@ export default function Profile() {
               Rating: {"5"} {/* Hardcoded for now */}
             </Text>
             <Text style={styles.bioText}>
-              {profile.personalBio || "No bio available."}
+              {profile.bio || "No bio available."}
             </Text>
           </View>
 
