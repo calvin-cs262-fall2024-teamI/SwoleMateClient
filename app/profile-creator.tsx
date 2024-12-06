@@ -1,6 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import globalStyles from "./stylesheets/globalStyles";
 import {
   Button,
   Image,
@@ -16,9 +18,8 @@ import {
   View,
   Platform,
 } from "react-native";
-import { UserContext } from "../nonapp/UserContext";
 import styles from "./stylesheets/profileCreatorStyles";
-
+import apiClient from "@/nonapp/axiosConfig";
 // Email validation regex
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 function ProfileCreator() {
@@ -43,12 +44,6 @@ function ProfileCreator() {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const router = useRouter();
-  const context = useContext(UserContext);
-  //handle the case where usercontext is undefined.
-  if (!context) {
-    return <Text>Loading...</Text>; // This can be changed
-  }
-  const { setUserInfo } = context; // Access user data from context
 
   const handlePickImageAsync = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -97,36 +92,27 @@ function ProfileCreator() {
     };
 
     try {
-      const response = await fetch(
-        "https://swolemate-service.azurewebsites.net/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userProfile),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text(); // Only read once
-        console.error("Error:", errorText);
-        alert(`Error: ${errorText}`); // Show error to user
-        return;
-      }
-
-      // Only attempt to read once:
-      const data = await response.json();
-
-      if (response.ok) {
+      const response = await apiClient.post("/api/auth/register", userProfile, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status == 200) {
         alert("Registration Successful! You can now log in.");
         router.replace("/welcome"); // Navigate to the welcome screen
-      } else {
-        alert("Error: " + (data.message || "Registration failed."));
       }
     } catch (error) {
-      console.error("Error registering user:", error);
-      alert("Network Error");
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("Error:", error.response.data);
+          alert(
+            `Error: ${error.response.data.message || "Registration failed."}`
+          );
+        } else {
+          console.error("Network Error:", error.message);
+          alert("Network Error");
+        }
+      }
     }
   };
 
@@ -149,20 +135,6 @@ function ProfileCreator() {
       return;
     }
     handleRegister();
-    setUserInfo({
-      username,
-      firstName,
-      lastName,
-      age: Number(age),
-      heightFt: Number(heightFt),
-      heightIn: Number(heightIn),
-      weight: Number(weight),
-      preferredTime,
-      workoutType,
-      experienceLevel,
-      personalBio,
-      profileImage,
-    });
 
     //router.push("/match");
   };
@@ -215,7 +187,9 @@ function ProfileCreator() {
                 onChangeText={text => setEmail(text.toLowerCase())}
                 style={styles.input}
               />
-              {emailError && <Text style={styles.errorText}>{emailError}</Text>}
+              {emailError && (
+                <Text style={globalStyles.errorText}>{emailError}</Text>
+              )}
               <Text style={styles.label}>Username</Text>
               <TextInput
                 placeholder="Username"
@@ -243,7 +217,9 @@ function ProfileCreator() {
                 style={[styles.input, !passwordMatch && { borderColor: "red" }]}
               />
               {!passwordMatch && (
-                <Text style={styles.errorText}>Passwords do not match</Text>
+                <Text style={globalStyles.errorText}>
+                  Passwords do not match
+                </Text>
               )}
               <Text style={styles.label}>First Name</Text>
               <TextInput
