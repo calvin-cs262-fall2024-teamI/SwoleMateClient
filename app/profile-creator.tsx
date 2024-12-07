@@ -20,8 +20,10 @@ import {
 } from "react-native";
 import styles from "./stylesheets/profileCreatorStyles";
 import apiClient from "@/nonapp/axiosConfig";
+
 // Email validation regex
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
 function ProfileCreator() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -39,25 +41,50 @@ function ProfileCreator() {
   const [workoutType, setWorkoutType] = useState("cardio");
   const [experienceLevel, setExperienceLevel] = useState("beginner");
   const [personalBio, setPersonalBio] = useState("");
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImageForm, setProfileImageForm] = useState<FormData | null>(
+    null
+  );
+  const [imageURI, setImageUri] = useState<string | null>(null);
+
   const [activePicker, setActivePicker] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
-
   const router = useRouter();
 
+  // Handle image selection from gallery
   const handlePickImageAsync = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
+    console.log("Image picker invoked");
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        quality: 1,
+      });
+      console.log("Image picker result:", result);
 
-    if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
-    } else {
-      alert("You did not select any image.");
+      if (!result.canceled) {
+        const localUri = result.assets[0].uri;
+        console.log("Selected image URI:", localUri);
+
+        const filename = localUri.split("/").pop();
+        //infer type of image:
+        const match = /\.(\w+)$/.exec(filename!);
+        const type = match ? `image/${match[1]}` : `image`;
+        setImageUri(localUri);
+        // Prepare FormData for file upload
+        const formData = new FormData();
+        // @ts-expect-error: special react native format for form data
+        formData.append("profilePicture", {
+          type: type,
+          uri: localUri,
+          name: filename,
+        });
+        setProfileImageForm(formData);
+      }
+    } catch (error) {
+      console.error("Error during image selection:", error);
     }
   };
 
+  // Handle picker selection (Preferred Time, Workout Type, Experience Level)
   const handleSelection = (itemValue: string) => {
     if (activePicker === "preferredTime") {
       setPreferredTime(itemValue);
@@ -74,6 +101,8 @@ function ProfileCreator() {
     setActivePicker(pickerType);
     setModalVisible(true);
   };
+
+  // Register new user and upload profile picture
   const handleRegister = async () => {
     const userProfile = {
       emailAddress: email,
@@ -86,20 +115,37 @@ function ProfileCreator() {
       height_inches: Number(heightIn),
       weight: Number(weight),
       gender: null, // Assume gender selection is handled separately
-      profilePictureUrl: null, // Handle image URL if available
-      experienceLevel: null, // Handle experience level
+      profilePictureUrl: null, // Initially null
+      experienceLevel, // Experience level from picker
       bio: personalBio,
     };
 
     try {
+      // Register user
       const response = await apiClient.post("/api/auth/register", userProfile, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      if (response.status == 200) {
-        alert("Registration Successful! You can now log in.");
-        router.replace("/welcome"); // Navigate to the welcome screen
+      if (response.status === 201) {
+        const userId = response.data.data.id;
+        alert("Registration Successful!");
+
+        // Upload profile picture if available
+        if (profileImageForm) {
+          try {
+            const uploadResponse = await apiClient.post(
+              `/api/auth/upload-profile-picture/${userId}`,
+              profileImageForm
+            );
+            console.log("Upload response:", uploadResponse);
+          } catch (uploadError) {
+            console.error("Image upload failed:", uploadError);
+            alert("Failed to upload profile picture.");
+          }
+        }
+
+        router.replace("/welcome");
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -116,7 +162,7 @@ function ProfileCreator() {
     }
   };
 
-  //TODO: Remove all this context stuff in the future, because the profile screen with fetch details from database
+  // Handle profile save (validate fields)
   const handleSaveProfile = () => {
     // Email validation check
     if (!emailRegex.test(email)) {
@@ -130,13 +176,9 @@ function ProfileCreator() {
       alert("Please fill in all required fields.");
       return;
     }
-    if (!username || !password || !passwordMatch) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    handleRegister();
 
-    //router.push("/match");
+    // Proceed with registration
+    handleRegister();
   };
 
   const dismissKeyboard = () => {
@@ -160,20 +202,15 @@ function ProfileCreator() {
             </View>
 
             <View style={styles.profileImageSection}>
-              {profileImage && (
-                <Image
-                  source={{ uri: profileImage }}
-                  style={styles.profileImage}
-                />
+              {imageURI && (
+                <Image source={{ uri: imageURI }} style={styles.profileImage} />
               )}
               <TouchableOpacity
                 onPress={handlePickImageAsync}
                 style={styles.selectProfileImageBox}
               >
                 <Text style={styles.selectProfileText}>
-                  {profileImage
-                    ? "Change Profile Image"
-                    : "Select Profile Image"}
+                  {imageURI ? "Change Profile Image" : "Select Profile Image"}
                 </Text>
               </TouchableOpacity>
             </View>
