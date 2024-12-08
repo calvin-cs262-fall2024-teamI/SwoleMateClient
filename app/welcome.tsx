@@ -3,9 +3,12 @@ import gymBackground from "@/assets/gym_background.jpg";
 import smallerLogo from "@/assets/SmallerLogo.png";
 import twoPeopleWorkingOut from "@/assets/two_people_working_out.jpg";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserContext } from "../nonapp/UserContext";
+import apiClient from "@/nonapp/axiosConfig";
+
 import {
   Button,
   Image,
@@ -16,7 +19,7 @@ import {
   View,
 } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
-import styles from "./WelcomeScreenStyles";
+import styles from "./stylesheets/WelcomeScreenStyles";
 import { ImageSourcePropType } from "react-native";
 
 type Slide = {
@@ -41,6 +44,7 @@ const WelcomeScreen: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [emailValid, setEmailValid] = useState<boolean>(true);
   const [passwordValid, setPasswordValid] = useState<boolean>(true);
+  const context = useContext(UserContext);
 
   const sliderRef = useRef<AppIntroSlider | null>(null);
 
@@ -73,9 +77,6 @@ const WelcomeScreen: React.FC = () => {
   }, [slides.length]);
 
   const handleRegister = () => {
-    //TODO :
-    //dont let user register if an email account or username is already in the database.
-
     router.push("/profile-creator");
   };
 
@@ -88,8 +89,8 @@ const WelcomeScreen: React.FC = () => {
 
     if (isEmailValid && isPasswordValid) {
       try {
-        const response = await axios.post(
-          "https://swolemate-service.azurewebsites.net/api/auth/login",
+        const response = await apiClient.post(
+          "/api/auth/login",
           { emailAddress: email, password },
           {
             headers: {
@@ -99,10 +100,14 @@ const WelcomeScreen: React.FC = () => {
         );
 
         if (response.status === 200) {
-          const { accessToken, refreshToken } = response.data.data;
-          if (accessToken && refreshToken) {
+          const { accessToken, refreshToken, id } = response.data.data;
+          if (accessToken && refreshToken && id) {
             await AsyncStorage.setItem("accessToken", accessToken);
             await AsyncStorage.setItem("refreshToken", refreshToken);
+            // Update the UserContext with the user ID
+            if (context) {
+              context.setUserId(id.toString());
+            }
             router.push("/match");
           } else {
             console.log("Invalid response from server.");

@@ -1,6 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import globalStyles from "./stylesheets/globalStyles";
 import {
   Button,
   Image,
@@ -15,12 +17,13 @@ import {
   TouchableWithoutFeedback,
   View,
   Platform,
-  StyleSheet,
 } from "react-native";
-import { UserContext } from "../nonapp/UserContext";
+import styles from "./stylesheets/profileCreatorStyles";
+import apiClient from "@/nonapp/axiosConfig";
 
 // Email validation regex
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
 function ProfileCreator() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -38,31 +41,50 @@ function ProfileCreator() {
   const [workoutType, setWorkoutType] = useState("cardio");
   const [experienceLevel, setExperienceLevel] = useState("beginner");
   const [personalBio, setPersonalBio] = useState("");
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImageForm, setProfileImageForm] = useState<FormData | null>(
+    null
+  );
+  const [imageURI, setImageUri] = useState<string | null>(null);
+
   const [activePicker, setActivePicker] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
-
   const router = useRouter();
-  const context = useContext(UserContext);
-  //handle the case where usercontext is undefined.
-  if (!context) {
-    return <Text>Loading...</Text>; // This can be changed
-  }
-  const { setUserInfo } = context; // Access user data from context
 
+  // Handle image selection from gallery
   const handlePickImageAsync = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
+    console.log("Image picker invoked");
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        quality: 1,
+      });
+      console.log("Image picker result:", result);
 
-    if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
-    } else {
-      alert("You did not select any image.");
+      if (!result.canceled) {
+        const localUri = result.assets[0].uri;
+        console.log("Selected image URI:", localUri);
+
+        const filename = localUri.split("/").pop();
+        //infer type of image:
+        const match = /\.(\w+)$/.exec(filename!);
+        const type = match ? `image/${match[1]}` : `image`;
+        setImageUri(localUri);
+        // Prepare FormData for file upload
+        const formData = new FormData();
+        // @ts-expect-error: special react native format for form data
+        formData.append("profilePicture", {
+          type: type,
+          uri: localUri,
+          name: filename,
+        });
+        setProfileImageForm(formData);
+      }
+    } catch (error) {
+      console.error("Error during image selection:", error);
     }
   };
 
+  // Handle picker selection (Preferred Time, Workout Type, Experience Level)
   const handleSelection = (itemValue: string) => {
     if (activePicker === "preferredTime") {
       setPreferredTime(itemValue);
@@ -79,6 +101,8 @@ function ProfileCreator() {
     setActivePicker(pickerType);
     setModalVisible(true);
   };
+
+  // Register new user and upload profile picture
   const handleRegister = async () => {
     const userProfile = {
       emailAddress: email,
@@ -91,46 +115,54 @@ function ProfileCreator() {
       height_inches: Number(heightIn),
       weight: Number(weight),
       gender: null, // Assume gender selection is handled separately
-      profilePictureUrl: null, // Handle image URL if available
-      experienceLevel: null, // Handle experience level
+      profilePictureUrl: null, // Initially null
+      experienceLevel, // Experience level from picker
       bio: personalBio,
     };
 
     try {
-      const response = await fetch(
-        "https://swolemate-service.azurewebsites.net/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userProfile),
+      // Register user
+      const response = await apiClient.post("/api/auth/register", userProfile, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 201) {
+        const userId = response.data.data.id;
+        alert("Registration Successful!");
+
+        // Upload profile picture if available
+        if (profileImageForm) {
+          try {
+            const uploadResponse = await apiClient.post(
+              `/api/auth/upload-profile-picture/${userId}`,
+              profileImageForm
+            );
+            console.log("Upload response:", uploadResponse);
+          } catch (uploadError) {
+            console.error("Image upload failed:", uploadError);
+            alert("Failed to upload profile picture.");
+          }
         }
-      );
 
-      if (!response.ok) {
-        const errorText = await response.text(); // Only read once
-        console.error("Error:", errorText);
-        alert(`Error: ${errorText}`); // Show error to user
-        return;
-      }
-
-      // Only attempt to read once:
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Registration Successful! You can now log in.");
-        router.replace("/welcome"); // Navigate to the welcome screen
-      } else {
-        alert("Error: " + (data.message || "Registration failed."));
+        router.replace("/welcome");
       }
     } catch (error) {
-      console.error("Error registering user:", error);
-      alert("Network Error");
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("Error:", error.response.data);
+          alert(
+            `Error: ${error.response.data.message || "Registration failed."}`
+          );
+        } else {
+          console.error("Network Error:", error.message);
+          alert("Network Error");
+        }
+      }
     }
   };
 
-  //TODO: Remove all this context stuff in the future, because the profile screen with fetch details from database
+  // Handle profile save (validate fields)
   const handleSaveProfile = () => {
     // Email validation check
     if (!emailRegex.test(email)) {
@@ -144,27 +176,9 @@ function ProfileCreator() {
       alert("Please fill in all required fields.");
       return;
     }
-    if (!username || !password || !passwordMatch) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    handleRegister();
-    setUserInfo({
-      username,
-      firstName,
-      lastName,
-      age: Number(age),
-      heightFt: Number(heightFt),
-      heightIn: Number(heightIn),
-      weight: Number(weight),
-      preferredTime,
-      workoutType,
-      experienceLevel,
-      personalBio,
-      profileImage,
-    });
 
-    //router.push("/match");
+    // Proceed with registration
+    handleRegister();
   };
 
   const dismissKeyboard = () => {
@@ -188,20 +202,15 @@ function ProfileCreator() {
             </View>
 
             <View style={styles.profileImageSection}>
-              {profileImage && (
-                <Image
-                  source={{ uri: profileImage }}
-                  style={styles.profileImage}
-                />
+              {imageURI && (
+                <Image source={{ uri: imageURI }} style={styles.profileImage} />
               )}
               <TouchableOpacity
                 onPress={handlePickImageAsync}
                 style={styles.selectProfileImageBox}
               >
                 <Text style={styles.selectProfileText}>
-                  {profileImage
-                    ? "Change Profile Image"
-                    : "Select Profile Image"}
+                  {imageURI ? "Change Profile Image" : "Select Profile Image"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -215,7 +224,9 @@ function ProfileCreator() {
                 onChangeText={text => setEmail(text.toLowerCase())}
                 style={styles.input}
               />
-              {emailError && <Text style={styles.errorText}>{emailError}</Text>}
+              {emailError && (
+                <Text style={globalStyles.errorText}>{emailError}</Text>
+              )}
               <Text style={styles.label}>Username</Text>
               <TextInput
                 placeholder="Username"
@@ -243,7 +254,9 @@ function ProfileCreator() {
                 style={[styles.input, !passwordMatch && { borderColor: "red" }]}
               />
               {!passwordMatch && (
-                <Text style={styles.errorText}>Passwords do not match</Text>
+                <Text style={globalStyles.errorText}>
+                  Passwords do not match
+                </Text>
               )}
               <Text style={styles.label}>First Name</Text>
               <TextInput
@@ -413,123 +426,5 @@ function ProfileCreator() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  logo: {
-    width: 60,
-    height: 60,
-  },
-  title: {
-    fontSize: 24,
-    color: "#4B0082",
-    marginTop: 10,
-  },
-  profileImageSection: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 10,
-  },
-  selectProfileImageBox: {
-    padding: 10,
-    borderColor: "#6A5ACD",
-    borderWidth: 1,
-    borderRadius: 5,
-    backgroundColor: "#E6E6FA",
-  },
-  selectProfileText: {
-    color: "#4B0082",
-  },
-  formContainer: {
-    marginTop: 10,
-  },
-  label: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 5,
-  },
-  input: {
-    height: 40,
-    backgroundColor: "#F0F0F5",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    borderColor: "#6A5ACD",
-    borderWidth: 1,
-    marginBottom: 15,
-  },
-  heightContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  heightInput: {
-    width: "48%",
-    height: 40,
-    backgroundColor: "#F0F0F5",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    borderColor: "#6A5ACD",
-    borderWidth: 1,
-  },
-  bioInput: {
-    height: 80,
-    backgroundColor: "#F0F0F5",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    borderColor: "#6A5ACD",
-    borderWidth: 1,
-    textAlignVertical: "top",
-  },
-  buttonContainer: {
-    marginTop: 20,
-    backgroundColor: "#6A5ACD",
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 10,
-  },
-  modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    width: "80%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalOptionsContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-    width: "100%",
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-});
 
 export default ProfileCreator;
