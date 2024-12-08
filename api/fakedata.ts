@@ -16,7 +16,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Great trainer, very knowledgeable!", "Pushes me to do better every day."]
+    reviews: ["Great trainer, very knowledgeable!", "Pushes me to do better every day."]
   },
   {
     id: "2",
@@ -33,7 +33,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["The yoga sessions are very calming and refreshing.", "I feel more flexible and focused."]
+     reviews: ["The yoga sessions are very calming and refreshing.", "I feel more flexible and focused."]
   },
   {
     id: "3",
@@ -50,7 +50,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Incredible moves and energy!", "Very motivating and fun to work with."]
+     reviews: ["Incredible moves and energy!", "Very motivating and fun to work with."]
   },
   {
     id: "4",
@@ -67,7 +67,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["His training routines are intense but rewarding.", "Really focused on strength and endurance."]
+     reviews: ["His training routines are intense but rewarding.", "Really focused on strength and endurance."]
   },
   {
     id: "5",
@@ -84,7 +84,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Fun and engaging workouts.", "Great cardio routines that keep you moving!"]
+     reviews: ["Fun and engaging workouts.", "Great cardio routines that keep you moving!"]
   },
   {
     id: "6",
@@ -101,7 +101,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Excellent form and technique guidance.", "Really helps with improving lifting strength."]
+     reviews: ["Excellent form and technique guidance.", "Really helps with improving lifting strength."]
   },
   {
     id: "7",
@@ -118,7 +118,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Great running coach, knows how to push me!", "Very supportive and motivational."]
+     reviews: ["Great running coach, knows how to push me!", "Very supportive and motivational."]
   },
   {
     id: "8",
@@ -135,7 +135,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Best football trainer, extremely knowledgeable.", "His drills really improve my agility."]
+     reviews: ["Best football trainer, extremely knowledgeable.", "His drills really improve my agility."]
   },
   {
     id: "9",
@@ -152,7 +152,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Excellent trainer with a great attitude.", "Training sessions are challenging and fun."]
+     reviews: ["Excellent trainer with a great attitude.", "Training sessions are challenging and fun."]
   },
   {
     id: "10",
@@ -169,7 +169,7 @@ export const fakeUsers: IUserMatch[] = [
     matched: false,
     pending: false,
     showMore: false,
-    // reviews: ["Amazing coach, very professional.", "Definitely helped with improving my accuracy."]
+     reviews: ["Amazing coach, very professional.", "Definitely helped with improving my accuracy."]
   },
   {
     id: "11",

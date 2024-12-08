@@ -173,6 +173,7 @@ function MatchScreen() {
                       <Text>
                         {item.isTrainer ? "Type: Trainer" : "Type: Regular"}
                       </Text>
+                      <Text> Reveiews: {item.reviews}</Text>
                     </View>
                   )}
 
