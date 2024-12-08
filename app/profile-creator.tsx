@@ -1,14 +1,14 @@
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import globalStyles from "./stylesheets/globalStyles";
+import { Picker } from "@react-native-picker/picker";
 import {
   Button,
   Image,
   Keyboard,
   KeyboardAvoidingView,
-  Modal,
   SafeAreaView,
   ScrollView,
   Text,
@@ -20,9 +20,12 @@ import {
 } from "react-native";
 import styles from "./stylesheets/profileCreatorStyles";
 import apiClient from "@/nonapp/axiosConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserContext } from "@/nonapp/UserContext";
+import { ExperienceLevel, Gender } from "@/api/enums";
 
 // Email validation regex
-const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+const emailRegex = /^[a-zA-Z0-9._-]+@[a-zAZ0-9.-]+\.[a-zA-Z]{2,6}$/;
 
 function ProfileCreator() {
   const [username, setUsername] = useState("");
@@ -37,17 +40,17 @@ function ProfileCreator() {
   const [heightFt, setHeightFt] = useState("");
   const [heightIn, setHeightIn] = useState("");
   const [weight, setWeight] = useState("");
-  const [preferredTime, setPreferredTime] = useState("morning");
-  const [workoutType, setWorkoutType] = useState("cardio");
-  const [experienceLevel, setExperienceLevel] = useState("beginner");
+  const [gender, setGender] = useState<Gender | null>(null);
+  const [city, setCity] = useState("");
+  const [experienceLevel, setExperienceLevel] =
+    useState<ExperienceLevel | null>(null);
   const [personalBio, setPersonalBio] = useState("");
   const [profileImageForm, setProfileImageForm] = useState<FormData | null>(
     null
   );
   const [imageURI, setImageUri] = useState<string | null>(null);
+  const context = useContext(UserContext);
 
-  const [activePicker, setActivePicker] = useState<string | null>(null);
-  const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
 
   // Handle image selection from gallery
@@ -84,24 +87,6 @@ function ProfileCreator() {
     }
   };
 
-  // Handle picker selection (Preferred Time, Workout Type, Experience Level)
-  const handleSelection = (itemValue: string) => {
-    if (activePicker === "preferredTime") {
-      setPreferredTime(itemValue);
-    } else if (activePicker === "workoutType") {
-      setWorkoutType(itemValue);
-    } else if (activePicker === "experienceLevel") {
-      setExperienceLevel(itemValue);
-    }
-    setModalVisible(false);
-    setActivePicker(null);
-  };
-
-  const openModal = (pickerType: string) => {
-    setActivePicker(pickerType);
-    setModalVisible(true);
-  };
-
   // Register new user and upload profile picture
   const handleRegister = async () => {
     const userProfile = {
@@ -114,38 +99,55 @@ function ProfileCreator() {
       height_feet: Number(heightFt),
       height_inches: Number(heightIn),
       weight: Number(weight),
-      gender: null, // Assume gender selection is handled separately
+      gender: gender, // Set the selected gender here
+      city: city,
       profilePictureUrl: null, // Initially null
-      experienceLevel, // Experience level from picker
+      experienceLevel: experienceLevel, // Experience level from picker
       bio: personalBio,
     };
 
     try {
+      console.log(userProfile);
       // Register user
       const response = await apiClient.post("/api/auth/register", userProfile, {
         headers: {
           "Content-Type": "application/json",
         },
       });
+
       if (response.status === 201) {
-        const userId = response.data.data.id;
+        //store the accesstoken to storage since we are not redirecting to login
+        const { accessToken, refreshToken, id } = response.data.data;
+        if (accessToken && refreshToken && id) {
+          await AsyncStorage.setItem("accessToken", accessToken);
+          await AsyncStorage.setItem("refreshToken", refreshToken);
+          // Update the UserContext with the user ID
+          if (context) {
+            context.setUserId(id.toString());
+          }
+        } else {
+          console.log("Did not get the user id from the response");
+        }
         alert("Registration Successful!");
 
         // Upload profile picture if available
         if (profileImageForm) {
           try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const uploadResponse = await apiClient.post(
-              `/api/auth/upload-profile-picture/${userId}`,
+              `/api/auth/upload-profile-picture/${id}`,
               profileImageForm
             );
-            console.log("Upload response:", uploadResponse);
+            // console.log("Upload response:", uploadResponse);
           } catch (uploadError) {
             console.error("Image upload failed:", uploadError);
             alert("Failed to upload profile picture.");
           }
         }
 
-        router.replace("/welcome");
+        // router.replace("/welcome");
+        //take them to setting preferences
+        router.replace("/preferences");
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -251,13 +253,14 @@ function ProfileCreator() {
                   setPasswordMatch(password === text);
                 }}
                 secureTextEntry
-                style={[styles.input, !passwordMatch && { borderColor: "red" }]}
+                style={styles.input}
               />
               {!passwordMatch && (
                 <Text style={globalStyles.errorText}>
                   Passwords do not match
                 </Text>
               )}
+
               <Text style={styles.label}>First Name</Text>
               <TextInput
                 placeholder="First Name"
@@ -280,24 +283,42 @@ function ProfileCreator() {
                 keyboardType="numeric"
                 style={styles.input}
               />
-              <Text style={styles.label}>Height (Feet/Inches)</Text>
-              <View style={styles.heightContainer}>
-                <TextInput
-                  placeholder="Feet"
-                  value={heightFt}
-                  onChangeText={setHeightFt}
-                  keyboardType="numeric"
-                  style={styles.heightInput}
-                />
-                <TextInput
-                  placeholder="Inches"
-                  value={heightIn}
-                  onChangeText={setHeightIn}
-                  keyboardType="numeric"
-                  style={styles.heightInput}
-                />
-              </View>
-              <Text style={styles.label}>Weight (lbs)</Text>
+              {/* Open the gender picker modal */}
+              <Text style={styles.label}>Gender</Text>
+              <Picker
+                selectedValue={gender}
+                onValueChange={itemValue => setGender(itemValue)}
+                style={{ marginVertical: -50 }} // Adjust width here
+              >
+                <Picker.Item label="Male" value="male" />
+                <Picker.Item label="Female" value="female" />
+              </Picker>
+              <Text style={styles.label}>City:</Text>
+              <TextInput
+                placeholder="Enter your city:"
+                value={city}
+                onChangeText={setCity}
+                keyboardType="ascii-capable"
+                style={styles.input}
+              />
+              <Text style={styles.label}>Height:</Text>
+
+              <TextInput
+                placeholder="Feet"
+                value={heightFt}
+                onChangeText={setHeightFt}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+
+              <TextInput
+                placeholder="Inches"
+                value={heightIn}
+                onChangeText={setHeightIn}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+              <Text style={styles.label}>Weight</Text>
               <TextInput
                 placeholder="Weight"
                 value={weight}
@@ -305,120 +326,33 @@ function ProfileCreator() {
                 keyboardType="numeric"
                 style={styles.input}
               />
+              {/* Open the gender picker modal */}
+              <Text style={styles.label}>Experience Level</Text>
+              <View style={{ overflow: "hidden", marginTop: -12 }}>
+                <Picker
+                  selectedValue={experienceLevel}
+                  onValueChange={itemValue => setExperienceLevel(itemValue)}
+                  style={{ marginVertical: -50 }} // Adjust width here
+                >
+                  <Picker.Item label="Beginner" value="beginner" />
+                  <Picker.Item label="Intermediate" value="intermediate" />
+                  <Picker.Item label="Advanced" value="advanced" />
+                  <Picker.Item label="Expert" value="expert" />
+                </Picker>
+              </View>
+              {/* Profile Bio */}
               <Text style={styles.label}>Personal Bio</Text>
               <TextInput
-                placeholder="Write something about yourself"
+                placeholder="Tell us about yourself"
                 value={personalBio}
                 onChangeText={setPersonalBio}
-                style={styles.bioInput}
                 multiline
+                style={styles.bioInput}
               />
-              <Text style={styles.label}>Preferred Time to Workout:</Text>
-              <TouchableOpacity
-                onPress={() => openModal("preferredTime")}
-                style={styles.input}
-              >
-                <Text>
-                  {preferredTime.charAt(0).toUpperCase() +
-                    preferredTime.slice(1)}
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.label}>Workout Type:</Text>
-              <TouchableOpacity
-                onPress={() => openModal("workoutType")}
-                style={styles.input}
-              >
-                <Text>
-                  {workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.label}>Experience Level:</Text>
-              <TouchableOpacity
-                onPress={() => openModal("experienceLevel")}
-                style={styles.input}
-              >
-                <Text>
-                  {experienceLevel.charAt(0).toUpperCase() +
-                    experienceLevel.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            </View>
 
-            <Modal
-              transparent
-              visible={isModalVisible}
-              animationType="slide"
-              onRequestClose={() => setModalVisible(false)}
-            >
-              <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                <View style={styles.modalBackground}>
-                  <View style={styles.modalContainer}>
-                    <Text style={styles.modalTitle}>
-                      {activePicker === "preferredTime"
-                        ? "Preferred Time to Workout"
-                        : activePicker === "workoutType"
-                          ? "Workout Type"
-                          : "Experience Level"}
-                    </Text>
-                    <ScrollView
-                      contentContainerStyle={styles.modalOptionsContainer}
-                    >
-                      {activePicker === "preferredTime" &&
-                        [
-                          "Morning",
-                          "Afternoon",
-                          "Evening",
-                          "No Preference",
-                        ].map(item => (
-                          <TouchableOpacity
-                            key={item}
-                            onPress={() => handleSelection(item.toLowerCase())}
-                            style={styles.modalOption}
-                          >
-                            <Text>{item}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      {activePicker === "workoutType" &&
-                        ["Cardio", "Strength", "Muscle Gain", "Recovery"].map(
-                          item => (
-                            <TouchableOpacity
-                              key={item}
-                              onPress={() =>
-                                handleSelection(item.toLowerCase())
-                              }
-                              style={styles.modalOption}
-                            >
-                              <Text>{item}</Text>
-                            </TouchableOpacity>
-                          )
-                        )}
-                      {activePicker === "experienceLevel" &&
-                        ["Beginner", "Intermediate", "Advanced"].map(item => (
-                          <TouchableOpacity
-                            key={item}
-                            onPress={() => handleSelection(item.toLowerCase())}
-                            style={styles.modalOption}
-                          >
-                            <Text>{item}</Text>
-                          </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                    <Button
-                      title="Close"
-                      onPress={() => setModalVisible(false)}
-                      color="#4B0082"
-                    />
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </Modal>
-
-            <View style={styles.buttonContainer}>
-              <Button
-                title="Save Profile"
-                onPress={handleSaveProfile}
-                color="white"
-              />
+              <View style={styles.buttonContainer}>
+                <Button title="Save Profile" onPress={handleSaveProfile} />
+              </View>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
