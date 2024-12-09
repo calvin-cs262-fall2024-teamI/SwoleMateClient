@@ -1,16 +1,25 @@
+import { ExperienceLevel, Gender } from "./enums";
+
 export interface IUserMatch {
   id: string;
-  name: string;
+  emailAddress: string;
+  username: string;
+  firstName: string;
+  lastName: string;
   age: number;
-  height: number;
-  typeOfWorkout: string;
+  height_feet: number;
+  height_inches: number;
   weight: number;
-  gym: string;
-  city: string;
-  rating: number;
-  experience: string;
-  showMore?: boolean;
+  city?: string;
+  gym?: string;
+  showMore?: boolean; //TODO: CHANGE THIS SO WHEN IT IS CLICKED REVIEWS OF THAT USER ARE RETRIEVED.
+  gender?: Gender | null;
+  profilePictureUrl: string | undefined;
+  experienceLevel?: ExperienceLevel | null;
+  bio?: string | null;
   isTrainer: boolean;
+  cost?: number;
+  rating: number;
   matched?: boolean;
   pending?: boolean;
 }

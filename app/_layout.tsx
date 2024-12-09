@@ -46,6 +46,8 @@ export default function RootLayout() {
           {/* Protected Screens */}
           <Stack.Screen name="(screens)" options={{ headerShown: false }} />
           <Stack.Screen name="chat" options={{ headerShown: false }} />
+          <Stack.Screen name="preferences" options={{ headerShown: false }} />
+
           <Stack.Screen
             name="editProfile"
             options={{ title: "Edit Profile" }}
