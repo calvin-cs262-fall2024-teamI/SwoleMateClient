@@ -29,7 +29,7 @@ const PreferencesScreen = () => {
   const [preferredWorkoutTypes, setPreferredWorkoutTypes] = useState<string[]>(
     []
   );
-  const [preferredGym, setPreferredGym] = useState<string[]>([]);
+  const [preferredGyms, setPreferredGyms] = useState<string[]>([]);
   const [preferredDays, setPreferredDays] = useState<DayOfWeek[]>([]);
   const [maxBudget, setMaxBudget] = useState<number | null>(null);
   const [goals, setGoals] = useState<string[]>([]);
@@ -86,7 +86,7 @@ const PreferencesScreen = () => {
       preferredExperienceLevels,
       preferredWorkoutTimes,
       preferredWorkoutTypes,
-      preferredGym,
+      preferredGyms,
       preferredDays,
       maxBudget,
       goals,
@@ -100,6 +100,8 @@ const PreferencesScreen = () => {
     }
 
     try {
+      console.log(preferences);
+
       const response = await apiClient.post(
         "/api/userpreferences",
         preferences,
@@ -181,9 +183,9 @@ const PreferencesScreen = () => {
         return (
           <CustomMultiSelect
             data={gyms}
-            selectedItems={preferredGym}
+            selectedItems={preferredGyms}
             onSelect={item =>
-              toggleSelection<string>(item, preferredGym, setPreferredGym)
+              toggleSelection<string>(item, preferredGyms, setPreferredGyms)
             }
             label="Select Gyms"
           />
