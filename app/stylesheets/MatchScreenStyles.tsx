@@ -122,6 +122,18 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     alignItems: "center",
   },
+
+  reviewContainer: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "white",
+    width: "100%",
+  },
+  reviewText: {
+    fontSize: 14,
+    color: "#333",
+  },
 });
 
 export default styles;

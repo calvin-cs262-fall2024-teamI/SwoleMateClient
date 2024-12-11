@@ -173,7 +173,16 @@ function MatchScreen() {
                       <Text>
                         {item.isTrainer ? "Type: Trainer" : "Type: Regular"}
                       </Text>
-                      <Text> Reveiews: {item.reviews}</Text>
+                      <View> 
+                        <View style={styles.reviewContainer}>
+                          <Text>Reviews:</Text>
+                          {item.reviews.map((review, index) => (
+                            <Text key={index} style={styles.reviewText}>
+                              {review}
+                            </Text>
+                          ))}
+                        </View>
+                      </View>
                     </View>
                   )}
 
