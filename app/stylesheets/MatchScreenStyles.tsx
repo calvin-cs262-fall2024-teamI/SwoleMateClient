@@ -122,6 +122,74 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     alignItems: "center",
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 20,
+  },
+  tutorialBox: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "black",
+  },
+  modalContent: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "black",
+    marginBottom: 20,
+  },
+  arrowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginTop: 20,
+  },
+  arrowButton: {
+    padding: 10,
+    backgroundColor: "#ddd",
+    borderRadius: 5,
+  },
+  rightArrowAligned: {
+    marginLeft: "auto", // Pushes the right arrow to the far right
+  },
+
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "black",
+    padding: 10,
+    borderRadius: 5,
+  },
+  questionMarkButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });
 
 export default styles;

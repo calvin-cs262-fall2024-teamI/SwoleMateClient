@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   TextInput,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -27,9 +28,20 @@ function MatchScreen() {
   const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(
     null
   );
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const tutorialSteps = [
+    "1. Press the dropdown to select filter for users by criteria such as city, gym, or age.",
+    "2. Enter a specific filter value to refine your search by pressing on 'Enter Value' on the top right.",
+    "3. Click 'Sort' to change the sorting order (ascending or descending).",
+    "4. Tap 'Match' to send a match request or 'Ignore' to remove a user.",
+    "5. Press 'Read More' to view additional user details.",
+  ];
+
   const [specificFilter, setSpecificFilter] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [isFocus, setIsFocus] = useState(false);
+  const [tutorialVisible, setTutorialVisible] = useState(false); // New state for tutorial modal
 
   const filterOptions: Array<{ label: string; value: keyof IUserMatch }> = [
     { label: "City", value: "city" },
@@ -39,6 +51,7 @@ function MatchScreen() {
     { label: "Experience", value: "experienceLevel" },
     { label: "Regular or Trainer", value: "isTrainer" },
   ];
+
   const fetchUsers = async (resetPage = false) => {
     if (resetPage) setPage(1);
     setIsLoading(true);
@@ -64,11 +77,13 @@ function MatchScreen() {
       setIsLoading(false);
     }
   };
+
   const handleLoadMore = () => {
     if (page < totalPages && !isLoading) {
       setPage(prevPage => prevPage + 1);
     }
   };
+
   useEffect(() => {
     fetchUsers();
   }, [page, selectedFilter, specificFilter, sortOrder]);
@@ -139,7 +154,61 @@ function MatchScreen() {
         resizeMode="cover"
       >
         <View style={styles.container}>
-          {/* Filter container for dropdown and text input */}
+          {/* Tutorial Question Mark Button */}
+          <TouchableOpacity
+            style={styles.questionMarkButton}
+            onPress={() => setTutorialVisible(true)}
+          >
+            <AntDesign name="questioncircleo" size={24} color="black" />
+          </TouchableOpacity>
+
+          {/* Tutorial Modal */}
+          <Modal
+            visible={tutorialVisible}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={() => setTutorialVisible(false)}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.tutorialBox}>
+                <Text style={styles.modalTitle}>Match Screen</Text>
+                <Text style={styles.modalContent}>
+                  {tutorialSteps[currentStep]}
+                </Text>
+                <View style={styles.arrowContainer}>
+                  {/* Left arrow for steps greater than the first */}
+                  {currentStep > 0 && (
+                    <TouchableOpacity
+                      style={styles.arrowButton}
+                      onPress={() => setCurrentStep(prev => prev - 1)}
+                    >
+                      <AntDesign name="left" size={24} color="black" />
+                    </TouchableOpacity>
+                  )}
+                  {/* Right arrow for all steps except the last */}
+                  {currentStep < tutorialSteps.length - 1 && (
+                    <TouchableOpacity
+                      style={[
+                        styles.arrowButton,
+                        currentStep === 0 && styles.rightArrowAligned, // Aligns right arrow on the first step
+                      ]}
+                      onPress={() => setCurrentStep(prev => prev + 1)}
+                    >
+                      <AntDesign name="right" size={24} color="black" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setTutorialVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+          {/* Existing components */}
           <View style={styles.filterContainer}>
             <Dropdown
               style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
@@ -151,7 +220,7 @@ function MatchScreen() {
               onFocus={() => setIsFocus(true)}
               onBlur={() => setIsFocus(false)}
               onChange={item => {
-                setSelectedFilter(item.value); // item.value is now guaranteed to be keyof IUserMatch
+                setSelectedFilter(item.value);
                 setSpecificFilter("");
                 setIsFocus(false);
               }}
@@ -219,9 +288,6 @@ function MatchScreen() {
                   </Text>
                   <Text>Weight: {item.weight}lbs</Text>
                   <Text>Gender: {item.gender}</Text>
-
-                  {/*TODO: I NEED TO RETRIEVE type of workout FROM PREFERENCES TABLE */}
-                  {/* <Text>{item.typeOfWorkout}</Text> */}
                   <Text>{item.gym}</Text>
                   {item.showMore && (
                     <View>
@@ -234,7 +300,6 @@ function MatchScreen() {
                       <Text>Bio: {item.bio}</Text>
                     </View>
                   )}
-                  {/* TODO: WHEN USER CLICKS READ MORE THATS WHEN YOU FETCH THE REVIEWS FOR THAT USER FROM THE DATABASE */}
                   <TouchableOpacity
                     style={styles.readMoreButton}
                     onPress={() => {
