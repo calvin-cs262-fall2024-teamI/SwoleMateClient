@@ -1,22 +1,17 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import "../global.css";
-
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { UserProvider } from "../nonapp/UserContext"; // Import the UserProvider
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useColorScheme } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
   const [loaded] = useFonts({
     SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -32,32 +27,22 @@ export default function RootLayout() {
   }
 
   return (
-    <UserProvider>
-      {/* Wrap the app in UserProvider */}
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          {/* Public Screens */}
-          <Stack.Screen name="welcome" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="profile-creator"
-            options={{ headerShown: false }}
-          />
+    <SafeAreaProvider className={colorScheme === "dark" ? "dark" : ""}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: colorScheme === "dark" ? "#000" : "#fff",
+          },
+        }}
+      >
+        {/* Public Screens */}
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="edit_profile" />
 
-          {/* Protected Screens */}
-          <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-          <Stack.Screen name="chat" options={{ headerShown: false }} />
-          <Stack.Screen name="preferences" options={{ headerShown: false }} />
-
-          <Stack.Screen
-            name="editProfile"
-            options={{ title: "Edit Profile" }}
-          />
-          <Stack.Screen
-            name="editAccountDetails"
-            options={{ title: "Edit Account Details" }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </UserProvider>
+        {/* Protected Screens */}
+        <Stack.Screen name="(screens)" />
+      </Stack>
+    </SafeAreaProvider>
   );
 }
