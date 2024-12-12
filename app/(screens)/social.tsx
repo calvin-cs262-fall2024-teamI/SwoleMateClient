@@ -1,7 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, Image, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IChatItem } from "@/api/interfaces";
 import styles from ".././stylesheets/SocialScreenStyles";
@@ -11,9 +18,6 @@ const ChatItem = ({ item }: { item: IChatItem }) => (
   <TouchableOpacity
     style={styles.chatItem}
     onPress={() => {
-      // Assuming you're using Expo Router or React Navigation
-      // Replace 'navigation.navigate' with the appropriate navigation method if different
-      //   navigation.navigate("chat", { userID: item.id });
       router.push({
         pathname: "/chat/[userID]",
         params: { userID: item.id },
@@ -28,6 +32,7 @@ const ChatItem = ({ item }: { item: IChatItem }) => (
     <Text style={styles.time}>{item.time}</Text>
   </TouchableOpacity>
 );
+
 const TabContent = ({ activeTab }: { activeTab: string }) => {
   switch (activeTab) {
     case "Matched":
@@ -65,16 +70,27 @@ const TabContent = ({ activeTab }: { activeTab: string }) => {
 
 const RecentChatsScreen = () => {
   const [activeTab, setActiveTab] = useState("Matched");
+  const [tutorialVisible, setTutorialVisible] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const tutorialSteps = [
+    "1. Use the tabs at the top to switch between Matched, Pending, and Requests.",
+    "2. Tap on a matched user to start a chat.",
+    "3. View pending requests and take actions such as accepting or ignoring.",
+    "4. Use the search icon in the header to search for chats.",
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Recent Chats</Text>
-        <TouchableOpacity>
-          <Ionicons name="search" size={24} color="black" />
+        <TouchableOpacity onPress={() => setTutorialVisible(true)}>
+          <Ionicons name="help-circle-outline" size={24} color="black" />
         </TouchableOpacity>
       </View>
 
+      {/* Tabs */}
       <View style={styles.tabs}>
         {["Matched", "Pending", "Requests"].map((tab, index) => (
           <TouchableOpacity
@@ -94,7 +110,54 @@ const RecentChatsScreen = () => {
         ))}
       </View>
 
+      {/* Tab Content */}
       <TabContent activeTab={activeTab} />
+
+      {/* Tutorial Modal */}
+      <Modal
+        visible={tutorialVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setTutorialVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.tutorialBox}>
+            <Text style={styles.modalTitle}>How to Use</Text>
+            <Text style={styles.modalContent}>
+              {tutorialSteps[currentStep]}
+            </Text>
+            <View style={styles.arrowContainer}>
+              {/* Left arrow for steps greater than the first */}
+              {currentStep > 0 && (
+                <TouchableOpacity
+                  style={styles.arrowButton}
+                  onPress={() => setCurrentStep(prev => prev - 1)}
+                >
+                  <Ionicons name="arrow-back" size={24} color="black" />
+                </TouchableOpacity>
+              )}
+              {/* Right arrow for steps before the last */}
+              {currentStep < tutorialSteps.length - 1 && (
+                <TouchableOpacity
+                  style={[
+                    styles.arrowButton,
+                    currentStep === 0 && styles.rightArrowAligned,
+                  ]}
+                  onPress={() => setCurrentStep(prev => prev + 1)}
+                >
+                  <Ionicons name="arrow-forward" size={24} color="black" />
+                </TouchableOpacity>
+              )}
+            </View>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setTutorialVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
