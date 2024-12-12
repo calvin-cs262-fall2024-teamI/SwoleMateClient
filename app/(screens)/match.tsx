@@ -165,7 +165,6 @@ function MatchScreen() {
                   <Text>Age: {item.age}</Text>
                   <Text>{item.typeOfWorkout}</Text>
                   <Text>{item.gym}</Text>
-
                   {item.showMore && (
                     <View>
                       <Text>City: {item.city}</Text>
@@ -174,12 +173,12 @@ function MatchScreen() {
                         {item.isTrainer ? "Type: Trainer" : "Type: Regular"}
                       </Text>
                       <View> 
-                        <View style={styles.reviewContainer}>
-                          <Text>Reviews:</Text>
-                          {item.reviews.map((review, index) => (
-                            <Text key={index} style={styles.reviewText}>
-                              {review}
-                            </Text>
+                        <View>
+                            <Text style={{ fontWeight: "bold" , marginTop: 15 }}>Reviews:</Text>
+                            {item.reviews && item.reviews.map((review, index) => (
+                            <View key={index} style={{ marginBottom: 5 , marginTop: 5}}>
+                              <Text style={styles.reviewText}>{review}</Text>
+                            </View>
                           ))}
                         </View>
                       </View>

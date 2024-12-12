@@ -124,15 +124,15 @@ const styles = StyleSheet.create({
   },
 
   reviewContainer: {
-    marginTop: 10,
+    backgroundColor: '007bff',
+    borderRadius: 8,
     padding: 10,
-    borderRadius: 5,
-    backgroundColor: "white",
-    width: "100%",
+    marginTop: 10,
+    
   },
   reviewText: {
     fontSize: 14,
-    color: "#333",
+    color: '#333',
   },
 });
 
