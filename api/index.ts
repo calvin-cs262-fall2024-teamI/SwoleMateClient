@@ -1,6 +1,13 @@
 import { Alert } from "react-native";
 import axiosInstance from "./axios";
-import { IReview, IUser, LoginResponse, RegisterRequest } from "./interfaces";
+import {
+  IUser,
+  LoginResponse,
+  IMatch,
+  socialUser,
+  IReview,
+  RegisterRequest,
+} from "./interfaces";
 import storage from "@/storage";
 import { ExperienceLevel, Gender } from "./enums";
 
@@ -124,6 +131,144 @@ export const api = {
       } catch (uploadError) {
         console.error("Image upload failed:", uploadError);
         Alert.alert("Failed to upload profile picture.");
+      }
+    },
+  },
+
+  buddymatches: {
+    getUsers: async (status: string) => {
+      try {
+        const { id } = await storage.getUser();
+        console.log("myid", id);
+
+        // Fetch all = matches
+        console.log(`/buddymatches?requesterId=${id}&status=${status}`);
+        const rsp = await axiosInstance.get(
+          `/buddymatches?requesterId=${id}&status=${status}`
+        );
+
+        // Validate the response structure
+        if (!rsp.data || !rsp.data.data || !Array.isArray(rsp.data.data)) {
+          throw new Error(
+            "Unexpected response structure from buddy matches endpoint."
+          );
+        }
+
+        const Matches = rsp.data.data;
+        console.log("Matches:", Matches);
+        if (Matches.length === 0) {
+          return []; // Return empty array if no matches are found
+        }
+
+        // Fetch profiles for all receiver IDs
+        const socialUsers: socialUser[] = await Promise.all(
+          Matches.map(async (match: IMatch) => {
+            if (!match.receiverId) {
+              throw new Error(
+                `Missing receiverId in match: ${JSON.stringify(match)}`
+              );
+            }
+
+            const userProfileRsp = await api.users.getUser(match.receiverId);
+            console.log(userProfileRsp);
+
+            const { firstName, lastName, profilePictureUrl, id } =
+              userProfileRsp;
+
+            return {
+              id,
+              name: `${firstName} ${lastName}`,
+              status: match.status, // Use status from the match data
+              profilePictureURL: profilePictureUrl,
+            } as socialUser;
+          })
+        );
+
+        return socialUsers;
+      } catch (error) {
+        console.error("Error fetching social users:", error);
+        throw new Error(
+          "Could not fetch social users. Please try again later."
+        );
+      }
+    },
+    getRequests: async () => {
+      try {
+        const { id } = await storage.getUser();
+        console.log("myid", id);
+
+        // Fetch all = matches
+        console.log(`/buddymatches?receiverId=${id}`);
+        const rsp = await axiosInstance.get(`/buddymatches?receiverId=${id}`);
+
+        // Validate the response structure
+        if (!rsp.data || !rsp.data.data || !Array.isArray(rsp.data.data)) {
+          throw new Error(
+            "Unexpected response structure from buddy matches endpoint."
+          );
+        }
+
+        const Matches = rsp.data.data;
+        console.log("Matches:", Matches);
+        if (Matches.length === 0) {
+          return []; // Return empty array if no matches are found
+        }
+
+        // Fetch profiles for all receiver IDs
+        const socialUsers: socialUser[] = await Promise.all(
+          Matches.map(async (match: IMatch) => {
+            if (!match.requesterId) {
+              throw new Error(
+                `Missing requesterId in match: ${JSON.stringify(match)}`
+              );
+            }
+
+            const userProfileRsp = await api.users.getUser(match.requesterId);
+            console.log(userProfileRsp);
+
+            const { firstName, lastName, profilePictureUrl, id } =
+              userProfileRsp;
+
+            return {
+              id,
+              name: `${firstName} ${lastName}`,
+              status: match.status, // Use status from the match data
+              profilePictureURL: profilePictureUrl,
+            } as socialUser;
+          })
+        );
+
+        return socialUsers;
+      } catch (error) {
+        console.error("Error fetching social users:", error);
+        throw new Error(
+          "Could not fetch social users. Please try again later."
+        );
+      }
+    },
+    acceptRequest: async (buddyMatchId: number) => {
+      try {
+        const myUser = await storage.getUser();
+
+        if (!myUser || !myUser.id) {
+          throw new Error("User not found or not logged in.");
+        }
+
+        // Step 2: Update its status to 'accepted'
+        const updateResponse = await axiosInstance.put(
+          `/buddymatches/${buddyMatchId}`,
+          {
+            status: "accepted",
+          }
+        );
+
+        if (!updateResponse.data.success) {
+          throw new Error("Failed to update match status.");
+        }
+
+        return true;
+      } catch (error) {
+        console.log(error);
       }
     },
   },
