@@ -2,8 +2,13 @@ import axios from "axios";
 import { AxiosError } from "axios";
 import storage from "@/storage/";
 import { BaseResponse } from "./interfaces";
-
-const BASE_URL = "http://10.25.14.170:3000/api";
+import { api } from "./index";
+import {
+  refreshToken,
+  retryRequestWithNewToken,
+  logApiError,
+} from "@/utils/authUtils";
+const BASE_URL = "http://153.106.89.85:3000/api";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -12,7 +17,7 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
+//request interceptor
 axiosInstance.interceptors.request.use(
   async config => {
     const token = await storage.getToken();
@@ -26,7 +31,6 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 axiosInstance.interceptors.response.use(
   response => {
     const apiResponse = response.data as BaseResponse;
@@ -35,9 +39,22 @@ axiosInstance.interceptors.response.use(
     }
     return response;
   },
-  (error: AxiosError<BaseResponse>) => {
-    console.error("API Error:", error.response?.data);
-    return error.response;
+  async (error: AxiosError<BaseResponse>) => {
+    //deal with jwt token expiration
+
+    if (error.response?.data?.msg === "jwt expired") {
+      try {
+        const newToken = await refreshToken();
+        return retryRequestWithNewToken(error.config!, newToken);
+      } catch (refreshError) {
+        console.error("Token refresh failed:", refreshError);
+        await storage.clear();
+        throw refreshError;
+      }
+    }
+
+    logApiError(error);
+    return Promise.reject(error);
   }
 );
 

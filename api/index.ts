@@ -51,8 +51,10 @@ export const api = {
       return await axiosInstance.post("/auth/register", data);
     },
 
-    refresh: async () => {
-      return await axiosInstance.post("/auth/refresh");
+    refresh: async (token: string) => {
+      return await axiosInstance.post("/auth/refresh", {
+        refreshToken: token,
+      });
     },
 
     logout: async () => {

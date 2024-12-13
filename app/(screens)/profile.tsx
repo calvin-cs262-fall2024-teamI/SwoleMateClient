@@ -125,7 +125,7 @@ const Profile = () => {
         className="bg-red-500 mx-4 mb-8 p-4 rounded-xl"
         onPress={async () => {
           try {
-            await api.auth.logout();
+            //await api.auth.logout();
             await storage.clear();
             router.replace("/welcome");
           } catch (error) {
