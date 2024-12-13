@@ -1,13 +1,24 @@
 import { Alert } from "react-native";
 import axiosInstance from "./axios";
-import { IUser, LoginResponse, RegisterRequest } from "./interfaces";
+import { IReview, IUser, LoginResponse, RegisterRequest } from "./interfaces";
 import storage from "@/storage";
 import { ExperienceLevel, Gender } from "./enums";
 
 export const api = {
   users: {
-    getUsers: async () => {
-      const rsp = await axiosInstance.get("/users");
+    getUsers: async (
+      filters?: Partial<{
+        gender: string;
+        age: number;
+        experienceLevel: string;
+        isTrainer: boolean;
+      }>
+    ) => {
+      console.log("filters", filters);
+
+      const rsp = await axiosInstance.get("/users", {
+        params: filters || {},
+      });
       return rsp.data.data as IUser[];
     },
 
@@ -22,6 +33,20 @@ export const api = {
 
     createUser: async (data: Omit<IUser, "id">) => {
       return await axiosInstance.post<IUser>("/users", data);
+    },
+  },
+
+  reviews: {
+    getReviews: async () => {
+      const rsp = await axiosInstance.get("/reviews");
+      return rsp.data.data as IReview[];
+    },
+    getReviewsFor: async (userId: number) => {
+      const rsp = await axiosInstance.get(`/reviews?reviewedId=${userId}`);
+      return rsp.data.data as IReview[];
+    },
+    createReview: async (data: Omit<IReview, "id">) => {
+      return await axiosInstance.post<IReview>("/reviews", data);
     },
   },
 

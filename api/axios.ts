@@ -8,6 +8,7 @@ import {
   retryRequestWithNewToken,
   logApiError,
 } from "@/utils/authUtils";
+// const BASE_URL = "http://153.106.80.210:3000/api";
 const BASE_URL = "https://swolemate-service.azurewebsites.net/api";
 
 const axiosInstance = axios.create({

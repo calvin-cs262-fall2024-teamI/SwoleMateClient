@@ -1,5 +1,5 @@
-@baseUrl = http://localhost:3000/api
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWxBZGRyZXNzIjoiem4yM0BjYWx2aW4uZWR1IiwiaWF0IjoxNzMzOTQ5MjA2LCJleHAiOjE3MzM5NTI4MDZ9.JMkcdZQcC3Gb_XIboOYvYWR-RhAiKD72h5Q2_OoP8gs
+@baseUrl = https://swolemate-service.azurewebsites.net/api
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWxBZGRyZXNzIjoiem4yM0BjYWx2aW4uZWR1IiwiaWF0IjoxNzM0MTI2NzU0LCJleHAiOjE3MzQxMzAzNTR9.WkcYJDZ9tBA01DXccVj9YgUupZGwhwCJ0o96igaz_oU
 @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWxBZGRyZXNzIjoiem4yM0BjYWx2aW4uZWR1IiwiaWF0IjoxNzMzODkwOTU1LCJleHAiOjE3MzQ0OTU3NTV9.yugKPwjjJVLXl53UDeonvdKMJM3TqxhoYL1fPRr75Gw
 
 ### login
@@ -7,7 +7,7 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "emailAddress": "zn23@calvin.edu",
+  "emailAddress": "jeb64@calvin.edu",
   "password": "swolemate1234"
 }
 
@@ -22,7 +22,7 @@ Content-Type: application/json
 ### -----------------------------------
 
 ### User: GET
-GET {{baseUrl}}/users?gender=male
+GET {{baseUrl}}/users?id=1
 Authorization: Bearer {{accessToken}}
 
 ### User: POST
@@ -48,3 +48,25 @@ Content-Type: application/json
 ### User: DELETE
 DELETE {{baseUrl}}/users/36
 Authorization: Bearer {{accessToken}}
+
+
+### Reviews: GET
+
+GET {{baseUrl}}/reviews
+Authorization: Bearer {{accessToken}}
+
+### Reviews: GET by user id
+GET {{baseUrl}}/reviews?reviewedId=3
+Authorization: Bearer {{accessToken}}
+
+### Reviews: POST
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "reviewerId": 1,
+  "reviewedId": 3,
+  "rating": 5,
+  "reviewText": "Great workout partner! Really helped push me to achieve my fitness goals."
+}

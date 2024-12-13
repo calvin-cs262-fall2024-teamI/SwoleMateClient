@@ -85,7 +85,7 @@ const RegisterScreen = () => {
     }
     const status = await api.auth.register(form);
     if (status) {
-      router.push("/match");
+      router.replace("/match");
       //upload image
       if (!profileImageForm) {
         console.error("Profile image form is null. No file to upload.");

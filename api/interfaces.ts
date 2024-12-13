@@ -35,6 +35,15 @@ export interface IUser {
   isTrainer: boolean;
   cost: number;
 }
+
+export interface IReview {
+  id: number;
+  reviewerId: number;
+  reviewedId: number;
+  rating: number;
+  reviewText: string;
+}
+
 export interface RegisterRequest {
   emailAddress: string;
   password: string;

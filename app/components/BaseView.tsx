@@ -1,5 +1,5 @@
 import React from "react";
-import { ViewStyle } from "react-native";
+import { KeyboardAvoidingView, ViewStyle } from "react-native";
 import { Edges, SafeAreaView } from "react-native-safe-area-context";
 
 interface BaseViewProps {
@@ -17,7 +17,9 @@ export const BaseView: React.FC<BaseViewProps> = ({
 }) => {
   return (
     <SafeAreaView style={style} className={className} edges={edges}>
-      {children}
+      <KeyboardAvoidingView behavior="padding" className="flex-1">
+        {children}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
