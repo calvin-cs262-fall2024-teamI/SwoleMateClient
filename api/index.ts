@@ -79,6 +79,7 @@ export const api = {
     register: async (data: RegisterRequest) => {
       try {
         const rsp = await axiosInstance.post("/auth/register", data);
+        console.log("rsp", data);
         if (rsp.data.success) {
           const { accessToken, refreshToken, id, username, emailAddress } =
             rsp.data.data;
@@ -136,115 +137,73 @@ export const api = {
   },
 
   buddymatches: {
-    getUsers: async (status: string) => {
-      try {
-        const { id } = await storage.getUser();
-        console.log("myid", id);
+    getMatches: async () => {
+      const { id } = await storage.getUser();
+      const receivers = await axiosInstance.get(
+        `/buddymatches?receiverId=${id}&status=accepted`
+      );
+      const requesters = await axiosInstance.get(
+        `/buddymatches?requesterId=${id}&status=accepted`
+      );
 
-        // Fetch all = matches
-        console.log(`/buddymatches?requesterId=${id}&status=${status}`);
-        const rsp = await axiosInstance.get(
-          `/buddymatches?requesterId=${id}&status=${status}`
-        );
+      const matches = [...receivers.data.data, ...requesters.data.data];
 
-        // Validate the response structure
-        if (!rsp.data || !rsp.data.data || !Array.isArray(rsp.data.data)) {
-          throw new Error(
-            "Unexpected response structure from buddy matches endpoint."
+      const users = await Promise.all(
+        matches.map(async (match: IMatch) => {
+          const user = await api.users.getUser(
+            match.requesterId === id ? match.receiverId : match.requesterId
           );
-        }
+          return {
+            ...user,
+            matchId: match.id,
+            status: match.status,
+          };
+        })
+      );
 
-        const Matches = rsp.data.data;
-        console.log("Matches:", Matches);
-        if (Matches.length === 0) {
-          return []; // Return empty array if no matches are found
-        }
+      return users;
+    },
+    getPending: async () => {
+      const { id } = await storage.getUser();
+      const response = await axiosInstance.get(
+        `/buddymatches?requesterId=${id}&status=pending`
+      );
 
-        // Fetch profiles for all receiver IDs
-        const socialUsers: socialUser[] = await Promise.all(
-          Matches.map(async (match: IMatch) => {
-            if (!match.receiverId) {
-              throw new Error(
-                `Missing receiverId in match: ${JSON.stringify(match)}`
-              );
-            }
+      const matches = response.data.data;
 
-            const userProfileRsp = await api.users.getUser(match.receiverId);
-            console.log(userProfileRsp);
+      const users = await Promise.all(
+        matches.map(async (match: IMatch) => {
+          const user = await api.users.getUser(match.receiverId);
+          return {
+            ...user,
+            matchId: match.id,
+            status: match.status,
+          };
+        })
+      );
 
-            const { firstName, lastName, profilePictureUrl, id } =
-              userProfileRsp;
-
-            return {
-              id,
-              name: `${firstName} ${lastName}`,
-              status: match.status, // Use status from the match data
-              profilePictureURL: profilePictureUrl,
-            } as socialUser;
-          })
-        );
-
-        return socialUsers;
-      } catch (error) {
-        console.error("Error fetching social users:", error);
-        throw new Error(
-          "Could not fetch social users. Please try again later."
-        );
-      }
+      return users;
     },
     getRequests: async () => {
-      try {
-        const { id } = await storage.getUser();
-        console.log("myid", id);
+      const { id } = await storage.getUser();
+      const response = await axiosInstance.get(
+        `/buddymatches?receiverId=${id}&status=pending`
+      );
 
-        // Fetch all = matches
-        console.log(`/buddymatches?receiverId=${id}`);
-        const rsp = await axiosInstance.get(`/buddymatches?receiverId=${id}`);
+      const matches = response.data.data;
 
-        // Validate the response structure
-        if (!rsp.data || !rsp.data.data || !Array.isArray(rsp.data.data)) {
-          throw new Error(
-            "Unexpected response structure from buddy matches endpoint."
-          );
-        }
+      const users = await Promise.all(
+        matches.map(async (match: IMatch) => {
+          const user = await api.users.getUser(match.requesterId);
+          return {
+            ...user,
+            matchId: match.id,
+            status: match.status,
+          };
+        })
+      );
 
-        const Matches = rsp.data.data;
-        console.log("Matches:", Matches);
-        if (Matches.length === 0) {
-          return []; // Return empty array if no matches are found
-        }
-
-        // Fetch profiles for all receiver IDs
-        const socialUsers: socialUser[] = await Promise.all(
-          Matches.map(async (match: IMatch) => {
-            if (!match.requesterId) {
-              throw new Error(
-                `Missing requesterId in match: ${JSON.stringify(match)}`
-              );
-            }
-
-            const userProfileRsp = await api.users.getUser(match.requesterId);
-            console.log(userProfileRsp);
-
-            const { firstName, lastName, profilePictureUrl, id } =
-              userProfileRsp;
-
-            return {
-              id,
-              name: `${firstName} ${lastName}`,
-              status: match.status, // Use status from the match data
-              profilePictureURL: profilePictureUrl,
-            } as socialUser;
-          })
-        );
-
-        return socialUsers;
-      } catch (error) {
-        console.error("Error fetching social users:", error);
-        throw new Error(
-          "Could not fetch social users. Please try again later."
-        );
-      }
+      return users;
     },
     acceptRequest: async (buddyMatchId: number) => {
       try {
@@ -269,6 +228,30 @@ export const api = {
         return true;
       } catch (error) {
         console.log(error);
+      }
+    },
+    sendRequest: async (receiverId: number) => {
+      try {
+        const myUser = await storage.getUser();
+
+        if (!myUser || !myUser.id) {
+          throw new Error("User not found or not logged in.");
+        }
+
+        const response = await axiosInstance.post("/buddymatches", {
+          requesterId: myUser.id,
+          receiverId: receiverId,
+          status: "pending",
+        });
+
+        if (!response.data.success) {
+          throw new Error("Failed to send buddy match request.");
+        }
+
+        return true;
+      } catch (error) {
+        console.error("Error sending buddy match request:", error);
+        return false;
       }
     },
   },

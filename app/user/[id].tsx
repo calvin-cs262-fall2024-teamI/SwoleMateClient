@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { IUser, IReview } from "@/api/interfaces";
 import BaseView from "@/app/components/BaseView";
@@ -149,8 +156,11 @@ const UserProfile = () => {
           {/* Action Button */}
           <TouchableOpacity
             className="bg-blue-500 py-3.5 rounded-xl mt-4 mb-6"
-            onPress={() => {
-              // Handle send request logic
+            onPress={async () => {
+              const rst = await api.buddymatches.sendRequest(userObj.id);
+              if (rst) {
+                Alert.alert("Success", "Buddy request has been sent!");
+              }
             }}
           >
             <Text className="text-white text-center font-semibold text-base">

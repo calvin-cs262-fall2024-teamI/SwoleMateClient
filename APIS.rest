@@ -70,3 +70,20 @@ Content-Type: application/json
   "rating": 5,
   "reviewText": "Great workout partner! Really helped push me to achieve my fitness goals."
 }
+
+
+### BuddyMatches: GET
+
+GET {{baseUrl}}/buddyMatches
+Authorization: Bearer {{accessToken}}
+
+### BuddyMatches: POST
+POST {{baseUrl}}/buddyMatches
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "requesterId": 4,
+  "receiverId": 30,
+  "status": "pending"
+}

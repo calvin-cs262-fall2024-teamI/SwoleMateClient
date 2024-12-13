@@ -66,6 +66,7 @@ const Profile = () => {
         </Text>
         <Text className="text-gray-600 text-lg">@{user.username}</Text>
         <Text className="text-gray-500 mt-1">{user.emailAddress}</Text>
+        <Text className="text-gray-400 mt-1">ID: {user.id}</Text>
       </View>
       <View className="bg-white p-4 mx-4 rounded-xl shadow-sm">
         <Text className="text-lg font-semibold mb-2">About Me</Text>
