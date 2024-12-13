@@ -69,8 +69,7 @@ const WelcomeScreen = () => {
   };
 
   const handleSignUp = () => {
-    router.replace("/register");
-    notImplemented();
+    router.push("/register");
   };
 
   const handleForgotPassword = () => {
