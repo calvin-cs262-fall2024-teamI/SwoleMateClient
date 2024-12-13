@@ -80,19 +80,22 @@ export const api = {
   },
   image: {
     upload: async (profileImageForm: FormData) => {
-      console.log(profileImageForm);
       try {
         const { id } = await storage.getUser();
-        console.log("id is: ", id);
+
         if (!id) {
           console.error("id is not in storage");
           return;
         }
         const uploadResponse = await axiosInstance.post(
           `/auth/upload-profile-picture/${id}`,
-          profileImageForm
+          profileImageForm,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
-        console.log("Upload response:", uploadResponse);
       } catch (uploadError) {
         console.error("Image upload failed:", uploadError);
         Alert.alert("Failed to upload profile picture.");

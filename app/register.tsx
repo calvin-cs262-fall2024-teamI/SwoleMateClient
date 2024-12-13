@@ -83,17 +83,18 @@ const RegisterScreen = () => {
       setErrors(newErrors);
       return;
     }
-
-    console.log("Form submitted:", form);
-
     const status = await api.auth.register(form);
     if (status) {
-      router.replace("/match");
+      router.push("/match");
       //upload image
-      if (profileImageForm) {
-        await api.image.upload(profileImageForm);
+      if (!profileImageForm) {
+        console.error("Profile image form is null. No file to upload.");
       } else {
-        console.error("profile image form is null");
+        try {
+          await api.image.upload(profileImageForm);
+        } catch (error) {
+          console.error("Failed to upload profile image:", error);
+        }
       }
     }
   };
