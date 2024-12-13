@@ -1,7 +1,8 @@
 import { Alert } from "react-native";
 import axiosInstance from "./axios";
-import { IUser, LoginResponse } from "./interfaces";
+import { IUser, LoginResponse, RegisterRequest } from "./interfaces";
 import storage from "@/storage";
+import { ExperienceLevel, Gender } from "./enums";
 
 export const api = {
   users: {
@@ -43,12 +44,28 @@ export const api = {
       return false;
     },
 
-    register: async (data: {
-      emailAddress: string;
-      password: string;
-      username: string;
-    }) => {
-      return await axiosInstance.post("/auth/register", data);
+    register: async (data: RegisterRequest) => {
+      try {
+        const rsp = await axiosInstance.post("/auth/register", data);
+        if (rsp.data.success) {
+          const { accessToken, refreshToken, id, username, emailAddress } =
+            rsp.data.data;
+          storage.setToken(accessToken);
+          storage.setRefreshToken(refreshToken);
+          storage.setUser({ id, username, emailAddress });
+
+          return true;
+        }
+        Alert.alert("Registration Failed", rsp.data.msg || "Unknown error");
+        return false;
+      } catch (error) {
+        console.error("Registration error:", error);
+        Alert.alert(
+          "Registration Failed",
+          "An error occurred during registration."
+        );
+        return false;
+      }
     },
 
     refresh: async (token: string) => {
@@ -59,6 +76,27 @@ export const api = {
 
     logout: async () => {
       return await axiosInstance.post("/auth/logout");
+    },
+  },
+  image: {
+    upload: async (profileImageForm: FormData) => {
+      console.log(profileImageForm);
+      try {
+        const { id } = await storage.getUser();
+        console.log("id is: ", id);
+        if (!id) {
+          console.error("id is not in storage");
+          return;
+        }
+        const uploadResponse = await axiosInstance.post(
+          `/auth/upload-profile-picture/${id}`,
+          profileImageForm
+        );
+        console.log("Upload response:", uploadResponse);
+      } catch (uploadError) {
+        console.error("Image upload failed:", uploadError);
+        Alert.alert("Failed to upload profile picture.");
+      }
     },
   },
 };

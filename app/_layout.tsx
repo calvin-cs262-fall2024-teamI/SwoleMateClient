@@ -39,6 +39,7 @@ export default function RootLayout() {
         {/* Public Screens */}
         <Stack.Screen name="welcome" />
         <Stack.Screen name="edit_profile" />
+        <Stack.Screen name="register" />
 
         {/* Protected Screens */}
         <Stack.Screen name="(screens)" />

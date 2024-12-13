@@ -69,6 +69,7 @@ const WelcomeScreen = () => {
   };
 
   const handleSignUp = () => {
+    router.replace("/register");
     notImplemented();
   };
 

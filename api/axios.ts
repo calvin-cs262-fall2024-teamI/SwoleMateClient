@@ -8,7 +8,7 @@ import {
   retryRequestWithNewToken,
   logApiError,
 } from "@/utils/authUtils";
-const BASE_URL = "http://153.106.89.85:3000/api";
+const BASE_URL = "http://10.25.31.149:3000/api";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,

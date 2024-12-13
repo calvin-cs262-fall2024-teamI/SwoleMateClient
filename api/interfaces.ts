@@ -35,6 +35,24 @@ export interface IUser {
   isTrainer: boolean;
   cost: number;
 }
+export interface RegisterRequest {
+  emailAddress: string;
+  password: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  city: string;
+  height_feet: number;
+  height_inches: number;
+  weight: number;
+  gender: string;
+  profilePictureUrl: string | null;
+  experienceLevel: string;
+  bio?: string;
+  isTrainer?: boolean;
+  cost?: number;
+}
 
 export interface IChatItem {
   id: string;

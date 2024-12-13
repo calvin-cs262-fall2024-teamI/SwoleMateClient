@@ -18,6 +18,7 @@ import storage from "@/storage";
 import BaseView from "./components/BaseView";
 import { Picker } from "@react-native-picker/picker";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Gender } from "@/api/enums";
 
 const GENDER_OPTIONS = ["male", "female"] as const;
 const EXPERIENCE_LEVELS = [

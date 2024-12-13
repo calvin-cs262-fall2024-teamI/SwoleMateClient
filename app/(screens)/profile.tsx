@@ -6,10 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import { api } from "@/api";
 import { IUser } from "@/api/interfaces";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import storage from "@/storage";
 
 const Profile = () => {
@@ -24,6 +25,7 @@ const Profile = () => {
         setUser(userData);
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        storage.clear();
       } finally {
         setLoading(false);
       }
@@ -65,7 +67,6 @@ const Profile = () => {
         <Text className="text-gray-600 text-lg">@{user.username}</Text>
         <Text className="text-gray-500 mt-1">{user.emailAddress}</Text>
       </View>
-
       <View className="bg-white p-4 mx-4 rounded-xl shadow-sm">
         <Text className="text-lg font-semibold mb-2">About Me</Text>
         <Text className="text-gray-700">{user.bio}</Text>
