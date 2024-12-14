@@ -1,5 +1,6 @@
 @baseUrl = https://swolemate-service.azurewebsites.net/api
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWxBZGRyZXNzIjoiem4yM0BjYWx2aW4uZWR1IiwiaWF0IjoxNzM0MTI2NzU0LCJleHAiOjE3MzQxMzAzNTR9.WkcYJDZ9tBA01DXccVj9YgUupZGwhwCJ0o96igaz_oU
+# @baseUrl = http://localhost:3000/api
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWxBZGRyZXNzIjoiem4yM0BjYWx2aW4uZWR1IiwiaWF0IjoxNzM0MTM1OTMxLCJleHAiOjE3MzQxMzk1MzF9.oa3-1XPONJcphuhmjwpWLpDZx1E228Gk4ql71H-Si58
 @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWxBZGRyZXNzIjoiem4yM0BjYWx2aW4uZWR1IiwiaWF0IjoxNzMzODkwOTU1LCJleHAiOjE3MzQ0OTU3NTV9.yugKPwjjJVLXl53UDeonvdKMJM3TqxhoYL1fPRr75Gw
 
 ### login
@@ -86,4 +87,44 @@ Content-Type: application/json
   "requesterId": 4,
   "receiverId": 30,
   "status": "pending"
+}
+
+
+### ChatRooms: GET
+GET {{baseUrl}}/chatrooms?user1Id=1&user2Id=3
+Authorization: Bearer {{accessToken}}
+
+
+
+### ChatRooms: POST
+POST {{baseUrl}}/chatrooms
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "user1Id": 2,
+  "user2Id": 30
+}
+
+
+### Messages: GET
+GET {{baseUrl}}/chatmessages?chatRoomId=1
+Authorization: Bearer {{accessToken}}
+
+
+### Get messages from a specific chat room
+GET {{baseUrl}}/chatmessages?chatRoomId=1
+Authorization: Bearer {{accessToken}}
+
+
+
+### Post message
+POST {{baseUrl}}/chatmessages
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "chatRoomId": 15,
+  "senderId": 30,
+  "messageText": "Good"
 }

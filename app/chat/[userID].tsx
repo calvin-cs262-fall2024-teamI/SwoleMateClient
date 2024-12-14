@@ -9,58 +9,72 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { api } from "@/api";
+import { IMessage } from "@/api/interfaces";
 
 const MessageItem = ({
   message,
+  hisId,
 }: {
-  message: { isSelf: boolean; text: string; time: string };
+  message: IMessage;
+  hisId: number;
 }) => (
   <View
-    className={`flex flex-row my-2 ${
-      message.isSelf ? "justify-end" : "justify-start"
+    className={`flex-row mb-3 ${
+      message.senderId === hisId ? "" : "justify-end"
     }`}
   >
     <View
-      className={`rounded-lg px-4 py-2 ${
-        message.isSelf ? "bg-blue-500" : "bg-gray-300"
+      className={`rounded-lg px-4 py-2 max-w-[80%] ${
+        message.senderId === hisId ? "bg-gray-200" : "bg-blue-500"
       }`}
     >
-      <Text className="text-white text-sm">{message.text}</Text>
-      <Text className="text-gray-200 text-xs mt-1">{message.time}</Text>
+      <Text
+        className={`${
+          message.senderId === hisId ? "text-gray-800" : "text-white"
+        }`}
+      >
+        {message.messageText}
+      </Text>
     </View>
   </View>
 );
+
 const Chat = () => {
+  const params = useLocalSearchParams();
+  const { userID, profilePictureURL, name, chatRoomId } = params;
+
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [messages, setMessages] = useState([
-    { id: "1", text: "Hi there! How are you?", time: "15:30", isSelf: false },
-    {
-      id: "2",
-      text: "I'm doing great, thanks! How about you?",
-      time: "15:31",
-      isSelf: true,
-    },
-    {
-      id: "3",
-      text: "Just finished my workout at the gym",
-      time: "15:32",
-      isSelf: true,
-    },
-    {
-      id: "4",
-      text: "That's awesome! Keep up the good work! 💪",
-      time: "15:33",
-      isSelf: false,
-    },
-  ]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
+  const fetchMessages = async () => {
+    try {
+      const messagesData = (await api.messages.fromRoomId(
+        Number(chatRoomId)
+      )) as IMessage[];
+      setMessages(messagesData);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchMessages();
+    setRefreshing(false);
+  };
+
   useEffect(() => {
+    fetchMessages();
+
     const keyboardWillShowListener = Keyboard.addListener(
       "keyboardWillShow",
       e => setKeyboardHeight(e.endCoordinates.height)
@@ -74,27 +88,27 @@ const Chat = () => {
       keyboardWillShowListener.remove();
       keyboardWillHideListener.remove();
     };
-  }, []);
+  }, [chatRoomId]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (newMessage.trim() === "") return;
-    const currentTime = new Date();
-    const seconds = currentTime.getSeconds();
 
-    const newMessageObject = {
-      id: `${Date.now()}-${seconds}`,
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      isSelf: true,
-    };
+    try {
+      const sentMessage = await api.messages.send({
+        chatRoomId: Number(chatRoomId),
+        messageText: newMessage,
+      });
 
-    setMessages(prevMessages => [...prevMessages, newMessageObject]);
-    setNewMessage("");
+      setMessages(prevMessages => [...prevMessages, sentMessage]);
+      setNewMessage("");
 
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+      setTimeout(
+        () => flatListRef.current?.scrollToEnd({ animated: true }),
+        100
+      );
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   return (
@@ -110,12 +124,17 @@ const Chat = () => {
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <Image
-            source={require("@/assets/avatars/2.png")}
+            source={
+              profilePictureURL
+                ? { uri: profilePictureURL as string }
+                : require("@/assets/portrait_placeholder.png")
+            }
             className="w-10 h-10 rounded-full"
           />
           <View className="flex-1 ml-4">
-            <Text className="text-lg font-bold">Mike Mazowski</Text>
+            <Text className="text-lg font-bold">{name as string}</Text>
             <Text className="text-sm text-gray-500">Matched</Text>
+            <Text className="text-xs text-gray-400">Room #{chatRoomId}</Text>
           </View>
           <TouchableOpacity>
             <Ionicons name="ellipsis-vertical" size={24} color="#000" />
@@ -125,12 +144,17 @@ const Chat = () => {
         {/* Message List */}
         <FlatList
           data={messages}
-          renderItem={({ item }) => <MessageItem message={item} />}
+          renderItem={({ item }) => (
+            <MessageItem message={item} hisId={Number(userID)} />
+          )}
           keyExtractor={item => item.id}
           ref={flatListRef}
           contentContainerStyle={{ padding: 16 }}
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: true })
+          }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
 

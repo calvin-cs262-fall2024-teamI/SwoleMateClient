@@ -7,6 +7,7 @@ import {
   socialUser,
   IReview,
   RegisterRequest,
+  IMessage,
 } from "./interfaces";
 import storage from "@/storage";
 import { ExperienceLevel, Gender } from "./enums";
@@ -253,6 +254,74 @@ export const api = {
         console.error("Error sending buddy match request:", error);
         return false;
       }
+    },
+  },
+  chatRoom: {
+    getOrCreateRoomId: async ({
+      user1Id,
+      user2Id,
+    }: {
+      user1Id: number;
+      user2Id: number;
+    }) => {
+      // Ensure user1Id is always the smaller number
+      if (user1Id > user2Id) {
+        const temp = user1Id;
+        user1Id = user2Id;
+        user2Id = temp;
+      }
+      try {
+        // First try to get existing room
+        const getResponse = await axiosInstance.get(`/chatrooms`, {
+          params: {
+            user1Id,
+            user2Id,
+          },
+        });
+
+        // If room exists, return its ID
+        if (getResponse.data.data && getResponse.data.data.length > 0) {
+          return getResponse.data.data[0].id;
+        }
+
+        // If no room exists, create a new one
+        const createResponse = await axiosInstance.post(`/chatrooms`, {
+          user1Id,
+          user2Id,
+        });
+
+        if (!createResponse.data.success) {
+          throw new Error("Failed to create chat room");
+        }
+
+        return createResponse.data.data.id;
+      } catch (error) {
+        console.error("Error getting/creating chat room:", error);
+        return false;
+      }
+    },
+  },
+  messages: {
+    fromRoomId: async (chatRoomId: number) => {
+      const response = await axiosInstance.get("/chatmessages", {
+        params: { chatRoomId },
+      });
+      return response.data.data as IMessage[];
+    },
+    send: async ({
+      chatRoomId,
+      messageText,
+    }: {
+      chatRoomId: number;
+      messageText: string;
+    }) => {
+      const { id: senderId } = await storage.getUser();
+      const response = await axiosInstance.post("/chatmessages", {
+        chatRoomId,
+        senderId,
+        messageText,
+      });
+      return response.data.data as IMessage;
     },
   },
 };

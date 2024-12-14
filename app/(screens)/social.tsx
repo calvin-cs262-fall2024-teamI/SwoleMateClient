@@ -11,6 +11,7 @@ import { api } from "@/api";
 import { socialUser } from "@/api/interfaces";
 import { router } from "expo-router";
 import BaseView from "../components/BaseView";
+import storage from "@/storage";
 
 type TabType = "matched" | "pending" | "requests";
 
@@ -103,9 +104,25 @@ export default function Social() {
   const renderUserItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       className="flex-row items-center mx-4 my-2 p-3 bg-white rounded-xl shadow-sm border border-gray-100"
-      onPress={() => {
+      onPress={async () => {
         if (activeTab === "matched") {
-          router.push(`/chat/${item.id}`);
+          const { id } = await storage.getUser();
+          const chatRoomId = await api.chatRoom.getOrCreateRoomId({
+            user1Id: item.id,
+            user2Id: id,
+          });
+
+          console.log("Chat Room ID:", chatRoomId);
+
+          router.push({
+            pathname: "/chat/[userID]",
+            params: {
+              userID: item.id,
+              profilePictureURL: item.profilePictureURL,
+              name: item.name,
+              chatRoomId,
+            },
+          });
         }
       }}
     >

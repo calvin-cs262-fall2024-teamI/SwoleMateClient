@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { api } from "@/api";
 import { IUser } from "@/api/interfaces";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import storage from "@/storage";
 
 const Match = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,8 +32,11 @@ const Match = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       const users = await api.users.getUsers();
-      setUsers(users);
-      setFilteredUsers(users);
+      const me = await storage.getUser();
+      // Filter out the current user
+      const filteredOutSelf = users.filter(user => user.id !== me.id);
+      setUsers(filteredOutSelf);
+      setFilteredUsers(filteredOutSelf);
     };
 
     fetchUsers();

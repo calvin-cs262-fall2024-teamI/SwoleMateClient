@@ -17,6 +17,13 @@ export interface LoginResponse extends BaseResponse {
   };
 }
 
+export interface IMessage {
+  id: number;
+  chatRoomId: number;
+  senderId: number;
+  messageText: string;
+}
+
 export interface IUser {
   id: number;
   emailAddress: string;
