@@ -1,295 +1,262 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  FlatList,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-  SafeAreaView,
   TextInput,
-  ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ScrollView,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
-import AntDesign from "@expo/vector-icons/AntDesign";
-//import { fakeUsers } from "../../api/fakedata";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { IUserMatch } from "../../api/interfaces";
-import styles from ".././stylesheets/MatchScreenStyles";
-import apiClient from "@/nonapp/axiosConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { api } from "@/api";
+import { IUser } from "@/api/interfaces";
+import MultiSlider from "@ptomasroos/react-native-multi-slider";
+import storage from "@/storage";
 
-function MatchScreen() {
-  const [users, setUsers] = useState<IUserMatch[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<keyof IUserMatch | null>(
-    null
-  );
-  const [specificFilter, setSpecificFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [isFocus, setIsFocus] = useState(false);
+const Match = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
 
-  const filterOptions: Array<{ label: string; value: keyof IUserMatch }> = [
-    { label: "City", value: "city" },
-    { label: "Age", value: "age" },
-    { label: "Gym", value: "gym" },
-    { label: "Rating", value: "rating" },
-    { label: "Experience", value: "experienceLevel" },
-    { label: "Regular or Trainer", value: "isTrainer" },
-  ];
-  const fetchUsers = async (resetPage = false) => {
-    if (resetPage) setPage(1);
-    setIsLoading(true);
-    try {
-      const token = await AsyncStorage.getItem("accessToken"); // Replace "authToken" with your token key
-      const response = await apiClient.get("/api/users", {
-        headers: {
-          Authorization: `Bearer ${token}`, // Add token to Authorization header
-        },
-        params: {
-          page: resetPage ? 1 : page,
-          filterBy: selectedFilter,
-          filterValue: specificFilter,
-          sortOrder,
-        },
-      });
-      const { data, totalPages: fetchedTotalPages } = response.data;
-      setUsers(prevUsers => (resetPage ? data : [...prevUsers, ...data]));
-      setTotalPages(fetchedTotalPages);
-    } catch (error) {
-      console.error("error fetching users", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const handleLoadMore = () => {
-    if (page < totalPages && !isLoading) {
-      setPage(prevPage => prevPage + 1);
-    }
-  };
+  const [ageRange, setAgeRange] = useState([0, 100]);
+  const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [showTrainersOnly, setShowTrainersOnly] = useState(false);
+  const [selectedGender, setSelectedGender] = useState<
+    "all" | "male" | "female"
+  >("all");
+
+  const experienceLevels = ["beginner", "intermediate", "advanced"];
+
   useEffect(() => {
+    const fetchUsers = async () => {
+      const users = await api.users.getUsers();
+      const me = await storage.getUser();
+      // Filter out the current user
+      const filteredOutSelf = users.filter(user => user.id !== me.id);
+      setUsers(filteredOutSelf);
+      setFilteredUsers(filteredOutSelf);
+    };
+
     fetchUsers();
-  }, [page, selectedFilter, specificFilter, sortOrder]);
+  }, []);
 
-  //TODO: LINK THIS WITH DATABASE
-  const handleMatch = (userId: number | string) => {
-    setUsers(prevUsers =>
-      prevUsers.map(user =>
-        user.id === userId ? { ...user, matched: true, pending: true } : user
-      )
-    );
+  const applyFilters = (searchText: string = searchQuery) => {
+    const filtered = users.filter(user => {
+      const matchesSearch =
+        user.username.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.firstName.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchText.toLowerCase());
+
+      const matchesAge = user.age >= ageRange[0] && user.age <= ageRange[1];
+
+      const matchesExperience =
+        selectedExperience.length === 0 ||
+        selectedExperience.includes(user.experienceLevel);
+
+      const matchesTrainer = showTrainersOnly ? user.isTrainer : true;
+
+      const matchesGender =
+        selectedGender === "all" || user.gender === selectedGender;
+
+      return (
+        matchesSearch &&
+        matchesAge &&
+        matchesExperience &&
+        matchesTrainer &&
+        matchesGender
+      );
+    });
+
+    setFilteredUsers(filtered);
   };
 
-  const handleIgnore = (userId: number | string) => {
-    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+  const handleSearch = (text: string) => {
+    setSearchQuery(text);
+    applyFilters(text);
   };
 
-  // const filterUsers = () => {
-  //   let filteredUsers = [...nearbyUsers];
+  const toggleExperienceLevel = (level: string) => {
+    setSelectedExperience(prev => {
+      const newSelection = prev.includes(level)
+        ? prev.filter(item => item !== level)
+        : [...prev, level];
+      return newSelection;
+    });
+  };
 
-  //   if (selectedFilter && specificFilter) {
-  //     const filterValue = specificFilter.trim().toLowerCase();
+  useEffect(() => {
+    applyFilters();
+  }, [ageRange, selectedExperience, showTrainersOnly, selectedGender]);
 
-  //     filteredUsers = filteredUsers.filter(user => {
-  //       switch (selectedFilter) {
-  //         case "age": {
-  //           const ageFilter = parseInt(specificFilter, 10);
-  //           return user.age === ageFilter;
-  //         }
-  //         case "city":
-  //           return user.city.toLowerCase().includes(filterValue);
-  //         case "gym":
-  //           return user.gym.toLowerCase().includes(filterValue);
-  //         case "rating": {
-  //           const ratingFilter = parseFloat(specificFilter);
-  //           return user.rating >= ratingFilter;
-  //         }
-  //         case "experience":
-  //           return user.experience.toLowerCase().includes(filterValue);
-  //         case "isTrainer":
-  //           return filterValue === "trainer" ? user.isTrainer : !user.isTrainer;
-  //         default:
-  //           return true;
-  //       }
-  //     });
-  //   }
+  const resetFilters = () => {
+    setAgeRange([0, 100]);
+    setSelectedExperience([]);
+    setShowTrainersOnly(false);
+    setSelectedGender("all");
+    setSearchQuery("");
+    applyFilters("");
+  };
 
-  //   if (selectedFilter === "rating") {
-  //     filteredUsers.sort((a, b) =>
-  //       sortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
-  //     );
-  //   } else if (selectedFilter === "experience") {
-  //     filteredUsers.sort((a, b) =>
-  //       sortOrder === "asc"
-  //         ? a.experience.localeCompare(b.experience)
-  //         : b.experience.localeCompare(a.experience)
-  //     );
-  //   }
-
-  //   return filteredUsers;
-  // };
+  const renderUserCard = ({ item }: { item: IUser }) => (
+    <TouchableOpacity
+      className="flex-row bg-mine p-4 rounded-xl mb-3 shadow-sm"
+      onPress={() =>
+        router.push({
+          pathname: "/user/[id]",
+          params: { id: item.id, user: JSON.stringify(item) },
+        })
+      }
+    >
+      <Image
+        source={
+          item.profilePictureUrl
+            ? { uri: item.profilePictureUrl }
+            : require("@/assets/avatars/1.png")
+        }
+        className="w-20 h-20 rounded-full mr-4"
+      />
+      <View className="flex-1">
+        <Text className="text-lg font-semibold mb-1">
+          {item.firstName} {item.lastName}
+        </Text>
+        <Text className="text-gray-600 mb-1">
+          {item.age} years • {item.city}
+        </Text>
+        <Text className="text-gray-700 mb-1 text-sm">{item.bio}</Text>
+        {item.isTrainer && (
+          <Text className="text-blue-500 font-medium">
+            Trainer • ${item.cost}/session
+          </Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground
-        source={require("@/assets/swole.png")}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <View style={styles.container}>
-          {/* Filter container for dropdown and text input */}
-          <View style={styles.filterContainer}>
-            <Dropdown
-              style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
-              data={filterOptions}
-              labelField="label"
-              valueField="value"
-              placeholder={!isFocus ? "Filter/Sort by:" : "..."}
-              value={selectedFilter}
-              onFocus={() => setIsFocus(true)}
-              onBlur={() => setIsFocus(false)}
-              onChange={item => {
-                setSelectedFilter(item.value); // item.value is now guaranteed to be keyof IUserMatch
-                setSpecificFilter("");
-                setIsFocus(false);
-              }}
-              renderLeftIcon={() => (
-                <AntDesign
-                  color={isFocus ? "blue" : "black"}
-                  name="Safety"
-                  size={20}
-                />
-              )}
-            />
-            <TextInput
-              style={styles.filterTextInput}
-              placeholder="Enter Value"
-              value={specificFilter}
-              onChangeText={text => setSpecificFilter(text)}
-              onBlur={() => fetchUsers(true)}
-            />
-            {selectedFilter && (
+    <View className="flex-1 bg-gray-50">
+      <View className="px-4 pt-4">
+        <TextInput
+          className="h-10 px-4 bg-white rounded-lg border border-gray-200 mb-4"
+          placeholder="Search users..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+
+        <TouchableOpacity
+          className="mb-4 bg-blue-500 p-2 rounded-lg"
+          onPress={() => setIsFilterVisible(!isFilterVisible)}
+        >
+          <Text className="text-white text-center">
+            {isFilterVisible ? "Hide Filters" : "Show Filters"}
+          </Text>
+        </TouchableOpacity>
+
+        {isFilterVisible && (
+          <View className="bg-white p-4 rounded-lg mb-4">
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-xl font-semibold">Filters</Text>
               <TouchableOpacity
-                style={styles.sortButton}
-                onPress={() => {
-                  setSortOrder(prevOrder =>
-                    prevOrder === "asc" ? "desc" : "asc"
-                  );
-                  fetchUsers(true);
-                }}
+                className="bg-gray-200 px-3 py-1 rounded-lg"
+                onPress={resetFilters}
               >
-                <Text style={styles.buttonText}>
-                  Sort: {sortOrder === "asc" ? "Ascending" : "Descending"}
-                </Text>
+                <Text className="text-gray-700">Reset</Text>
               </TouchableOpacity>
-            )}
-          </View>
+            </View>
 
-          {/* List of nearby users */}
-          <FlatList
-            data={users}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => (
-              <View
-                style={[
-                  styles.userCard,
-                  item.showMore && styles.expandedUserCard,
-                ]}
-              >
-                <Image
-                  source={
-                    item.profilePictureUrl &&
-                    item.profilePictureUrl !== "null" &&
-                    item.profilePictureUrl !== ""
-                      ? { uri: item.profilePictureUrl }
-                      : require("@/assets/portrait_placeholder.png")
+            <Text className="text-lg font-semibold mb-2">Gender:</Text>
+            <View className="flex-row mb-4">
+              {["all", "male", "female"].map(gender => (
+                <TouchableOpacity
+                  key={gender}
+                  className={`flex-1 m-1 p-2 rounded-lg ${
+                    selectedGender === gender ? "bg-blue-500" : "bg-gray-200"
+                  }`}
+                  onPress={() =>
+                    setSelectedGender(gender as "all" | "male" | "female")
                   }
-                  style={styles.profileImage}
-                />
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>
-                    {item.firstName + " " + item.lastName}
-                  </Text>
-                  <Text>Age: {item.age}</Text>
-                  <Text>
-                    Height: {item.height_feet}&apos; {item.height_inches}
-                    &quot;
-                  </Text>
-                  <Text>Weight: {item.weight}lbs</Text>
-                  <Text>Gender: {item.gender}</Text>
-
-                  {/*TODO: I NEED TO RETRIEVE type of workout FROM PREFERENCES TABLE */}
-                  {/* <Text>{item.typeOfWorkout}</Text> */}
-                  <Text>{item.gym}</Text>
-                  {item.showMore && (
-                    <View>
-                      <Text>City: {item.city}</Text>
-                      <Text>Experience Level: {item.experienceLevel}</Text>
-                      <Text>
-                        {item.isTrainer ? "Type: Trainer" : "Type: Regular"}
-                        {item.isTrainer && <Text>Cost: {item.cost}</Text>}
-                      </Text>
-                      <Text>Bio: {item.bio}</Text>
-                    </View>
-                  )}
-                  {/* TODO: WHEN USER CLICKS READ MORE THATS WHEN YOU FETCH THE REVIEWS FOR THAT USER FROM THE DATABASE */}
-                  <TouchableOpacity
-                    style={styles.readMoreButton}
-                    onPress={() => {
-                      item.showMore = !item.showMore;
-                      setUsers([...users]);
-                    }}
+                >
+                  <Text
+                    className={`text-center ${
+                      selectedGender === gender ? "text-white" : "text-gray-700"
+                    }`}
                   >
-                    <Text style={styles.buttonText}>
-                      {item.showMore ? "Show Less" : "Read More"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.ignoreButton}
-                  onPress={() => handleIgnore(item.id)}
-                >
-                  <Text style={styles.buttonText}>X</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    item.pending ? styles.pendingButton : styles.defaultButton,
-                  ]}
-                  onPress={() => handleMatch(item.id)}
-                >
-                  <Text style={styles.buttonText}>
-                    {item.pending ? "Pending" : "Match"}{" "}
+                    {gender.charAt(0).toUpperCase() + gender.slice(1)}
                   </Text>
                 </TouchableOpacity>
+              ))}
+            </View>
 
-                <View style={styles.starContainer}>
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <Icon
-                      key={index}
-                      name="star"
-                      size={12}
-                      color={index < item.rating ? "#FFD700" : "#ccc"}
-                    />
-                  ))}
-                </View>
-              </View>
-            )}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={
-              isLoading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
-              ) : null
-            }
-          />
-        </View>
-      </ImageBackground>
-    </SafeAreaView>
+            <Text className="text-lg font-semibold mb-2">
+              Age Range: {ageRange[0]} - {ageRange[1]}
+            </Text>
+            <View className="items-center">
+              <MultiSlider
+                values={[ageRange[0], ageRange[1]]}
+                min={0}
+                max={100}
+                step={1}
+                sliderLength={280}
+                onValuesChange={values => setAgeRange(values)}
+                allowOverlap={false}
+                snapped
+              />
+            </View>
+
+            <Text className="text-lg font-semibold mb-2 mt-4">
+              Experience Level:
+            </Text>
+            <View className="flex-row flex-wrap">
+              {experienceLevels.map(level => (
+                <TouchableOpacity
+                  key={level}
+                  className={`m-1 p-2 rounded-lg ${
+                    selectedExperience.includes(level)
+                      ? "bg-blue-500"
+                      : "bg-gray-200"
+                  }`}
+                  onPress={() => toggleExperienceLevel(level)}
+                >
+                  <Text
+                    className={
+                      selectedExperience.includes(level)
+                        ? "text-white"
+                        : "text-gray-700"
+                    }
+                  >
+                    {level}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity
+              className={`mt-4 p-3 rounded-lg ${
+                showTrainersOnly ? "bg-blue-500" : "bg-gray-200"
+              }`}
+              onPress={() => setShowTrainersOnly(!showTrainersOnly)}
+            >
+              <Text
+                className={`text-center ${
+                  showTrainersOnly ? "text-white" : "text-gray-700"
+                }`}
+              >
+                {showTrainersOnly ? "Showing Trainers Only" : "Show All Users"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      <FlatList
+        data={filteredUsers}
+        renderItem={renderUserCard}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
+      />
+    </View>
   );
-}
+};
 
-export default MatchScreen;
+export default Match;

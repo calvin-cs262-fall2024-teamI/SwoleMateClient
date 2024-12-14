@@ -9,78 +9,72 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import styles from ".././stylesheets/[userID]Styles";
+import { router, useLocalSearchParams } from "expo-router";
+import { api } from "@/api";
+import { IMessage } from "@/api/interfaces";
 
 const MessageItem = ({
   message,
+  hisId,
 }: {
-  message: { isSelf: boolean; text: string; time: string };
+  message: IMessage;
+  hisId: number;
 }) => (
   <View
-    style={[
-      styles.messageWrapper,
-      message.isSelf ? styles.selfMessageWrapper : styles.otherMessageWrapper,
-    ]}
+    className={`flex-row mb-3 ${
+      message.senderId === hisId ? "" : "justify-end"
+    }`}
   >
     <View
-      style={[
-        styles.messageBox,
-        message.isSelf ? styles.selfMessage : styles.otherMessage,
-      ]}
+      className={`rounded-lg px-4 py-2 max-w-[80%] ${
+        message.senderId === hisId ? "bg-gray-200" : "bg-blue-500"
+      }`}
     >
       <Text
-        style={[
-          styles.messageText,
-          message.isSelf ? styles.selfMessageText : styles.otherMessageText,
-        ]}
+        className={`${
+          message.senderId === hisId ? "text-gray-800" : "text-white"
+        }`}
       >
-        {message.text}
-      </Text>
-      <Text
-        style={[
-          styles.messageTime,
-          message.isSelf ? styles.selfMessageTime : styles.otherMessageTime,
-        ]}
-      >
-        {message.time}
+        {message.messageText}
       </Text>
     </View>
   </View>
 );
 
-const ChatScreen = () => {
-  // TODO: figure out if this is still needed
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const Chat = () => {
+  const params = useLocalSearchParams();
+  const { userID, profilePictureURL, name, chatRoomId } = params;
+
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [messages, setMessages] = useState([
-    { id: "1", text: "Hi there! How are you?", time: "15:30", isSelf: false },
-    {
-      id: "2",
-      text: "I'm doing great, thanks! How about you?",
-      time: "15:31",
-      isSelf: true,
-    },
-    {
-      id: "3",
-      text: "Just finished my workout at the gym",
-      time: "15:32",
-      isSelf: true,
-    },
-    {
-      id: "4",
-      text: "That's awesome! Keep up the good work! 💪",
-      time: "15:33",
-      isSelf: false,
-    },
-  ]);
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const flatListRef = useRef<FlatList>(null); // Create a ref for FlatList
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
+
+  const fetchMessages = async () => {
+    try {
+      const messagesData = (await api.messages.fromRoomId(
+        Number(chatRoomId)
+      )) as IMessage[];
+      setMessages(messagesData);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchMessages();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
+    fetchMessages();
+
     const keyboardWillShowListener = Keyboard.addListener(
       "keyboardWillShow",
       e => setKeyboardHeight(e.endCoordinates.height)
@@ -94,75 +88,83 @@ const ChatScreen = () => {
       keyboardWillShowListener.remove();
       keyboardWillHideListener.remove();
     };
-  }, []);
+  }, [chatRoomId]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "") return; //dont send empty message
-    const currentTime = new Date();
-    const seconds = currentTime.getSeconds();
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === "") return;
 
-    const newMessageObject = {
-      id: `${Date.now()}-${seconds}`, // Generate a unique ID based on seconds. MAYBE CHANGE IN FUTURE
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      isSelf: true,
-    };
+    try {
+      const sentMessage = await api.messages.send({
+        chatRoomId: Number(chatRoomId),
+        messageText: newMessage,
+      });
 
-    //The setMessages function can take either a new state value or a function that receives the previous state as an argument.
-    setMessages(prevMessages => [...prevMessages, newMessageObject]);
-    setNewMessage(""); //clear input field
+      setMessages(prevMessages => [...prevMessages, sentMessage]);
+      setNewMessage("");
 
-    // Scroll to the end after message is added
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+      setTimeout(
+        () => flatListRef.current?.scrollToEnd({ animated: true }),
+        100
+      );
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      className="flex-1 bg-white"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}
     >
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
+      <SafeAreaView className="flex-1">
+        {/* Header */}
+        <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+          <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
           <Image
-            source={require("@/assets/avatars/2.png")}
-            style={styles.avatar}
+            source={
+              profilePictureURL
+                ? { uri: profilePictureURL as string }
+                : require("@/assets/portrait_placeholder.png")
+            }
+            className="w-10 h-10 rounded-full"
           />
-          <View style={styles.headerInfo}>
-            <Text style={styles.name}>Mike Mazowski</Text>
-            <Text style={styles.status}>Matched</Text>
+          <View className="flex-1 ml-4">
+            <Text className="text-lg font-bold">{name as string}</Text>
+            <Text className="text-sm text-gray-500">Matched</Text>
+            <Text className="text-xs text-gray-400">Room #{chatRoomId}</Text>
           </View>
           <TouchableOpacity>
             <Ionicons name="ellipsis-vertical" size={24} color="#000" />
           </TouchableOpacity>
         </View>
 
+        {/* Message List */}
         <FlatList
           data={messages}
-          renderItem={({ item }) => <MessageItem message={item} />}
+          renderItem={({ item }) => (
+            <MessageItem message={item} hisId={Number(userID)} />
+          )}
           keyExtractor={item => item.id}
           ref={flatListRef}
-          contentContainerStyle={styles.messageContainer}
+          contentContainerStyle={{ padding: 16 }}
           onContentSizeChange={() =>
             flatListRef.current?.scrollToEnd({ animated: true })
           }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
 
-        <View style={styles.inputContainer}>
+        {/* Input Area */}
+        <View className="flex-row items-center p-4 border-t border-gray-200">
           <TouchableOpacity>
             <Ionicons name="happy-outline" size={24} color="#666" />
           </TouchableOpacity>
           <TextInput
-            style={styles.input}
+            className="flex-1 mx-2 px-4 py-2 border border-gray-300 rounded-full text-sm"
             placeholder="Write a message..."
             placeholderTextColor="#666"
             value={newMessage}
@@ -171,9 +173,8 @@ const ChatScreen = () => {
           <TouchableOpacity>
             <Ionicons name="attach" size={24} color="#666" />
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={styles.sendButton}
+            className="ml-2 bg-blue-500 p-2 rounded-full"
             onPress={handleSendMessage}
           >
             <Ionicons name="send" size={24} color="#FFF" />
@@ -184,4 +185,4 @@ const ChatScreen = () => {
   );
 };
 
-export default ChatScreen;
+export default Chat;

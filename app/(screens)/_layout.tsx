@@ -1,110 +1,89 @@
-import React from "react";
-import { Tabs } from "expo-router";
-import { Text, View, Image } from "react-native";
-import AuthGuard from "../routes/auth";
-import matchIcon from "../../assets/navbar/match.png";
-import profileIcon from "../../assets/navbar/profile.png";
-import chatIcon from "../../assets/navbar/chat.png";
-
-const CustomTab = ({
-  focused,
-  icon,
-  label,
-}: {
-  focused: boolean;
-  icon: React.ReactNode;
-  label: string;
-}) => (
-  <View
-    style={{
-      width: 115,
-      height: 45,
-      padding: 15,
-      marginTop: 25,
-      backgroundColor: focused ? "#613EEA" : "#ADD8E6",
-      borderRadius: 44,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    {icon}
-    <Text
-      style={{
-        color: "white",
-        fontSize: 12,
-        marginLeft: 12,
-        fontFamily: "Tuffy",
-        fontWeight: "700",
-      }}
-    >
-      {label}
-    </Text>
-  </View>
-);
+import { Tabs, usePathname } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useState } from "react";
+import { Modal, View, Text, Pressable } from "react-native";
+import { getTutorialContent } from "@/app/tutorials";
 
 export default function TabLayout() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const pathname = usePathname();
+
   return (
-    <AuthGuard>
-      <Tabs
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarStyle: {
-            backgroundColor: "#fff",
-            height: 90,
-          },
-          tabBarItemStyle: {
-            margin: 5,
-          },
-          tabBarLabel: () => null,
-          tabBarIcon: ({ focused }) => {
-            if (route.name === "match") {
-              return (
-                <CustomTab
-                  focused={focused}
-                  icon={
-                    <Image
-                      source={matchIcon}
-                      style={{ width: 24, height: 24 }}
-                    />
-                  }
-                  label="Match"
-                />
-              );
-            } else if (route.name === "profile") {
-              return (
-                <CustomTab
-                  focused={focused}
-                  icon={
-                    <Image
-                      source={profileIcon}
-                      style={{ width: 24, height: 24 }}
-                    />
-                  }
-                  label="Profile"
-                />
-              );
-            } else if (route.name === "social") {
-              return (
-                <CustomTab
-                  focused={focused}
-                  icon={
-                    <Image
-                      source={chatIcon}
-                      style={{ width: 24, height: 24 }}
-                    />
-                  }
-                  label="Message"
-                />
-              );
-            }
-          },
-        })}
+    <>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
       >
-        <Tabs.Screen name="match" />
-        <Tabs.Screen name="social" />
-        <Tabs.Screen name="profile" />
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="m-5 bg-white rounded-2xl p-8 items-center shadow-lg w-11/12">
+            {getTutorialContent(pathname)}
+            <Pressable
+              className="rounded-full px-6 py-3 bg-[#FF4B4B] mt-4"
+              onPress={() => setModalVisible(false)}
+            >
+              <Text className="text-white font-bold text-center">Got it!</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: "#FF4B4B",
+          tabBarInactiveTintColor: "#999",
+          headerRight: () => (
+            <Pressable className="mr-4" onPress={() => setModalVisible(true)}>
+              <MaterialCommunityIcons
+                name="help-circle"
+                size={24}
+                color="#FF4B4B"
+              />
+            </Pressable>
+          ),
+        }}
+      >
+        <Tabs.Screen
+          name="match"
+          options={{
+            title: "Match",
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons
+                name="handshake"
+                size={24}
+                color={color}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="social"
+          options={{
+            title: "Social",
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons
+                name="account-group"
+                size={24}
+                color={color}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons
+                name="account-circle"
+                size={24}
+                color={color}
+              />
+            ),
+          }}
+        />
       </Tabs>
-    </AuthGuard>
+    </>
   );
 }

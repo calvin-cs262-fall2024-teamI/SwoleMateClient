@@ -5,7 +5,8 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["nativewind/types"]
   },
   "include": [
     "**/*.ts",

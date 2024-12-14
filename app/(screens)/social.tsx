@@ -1,102 +1,203 @@
-import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
+import { api } from "@/api";
+import { socialUser } from "@/api/interfaces";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { View, Text, Image, FlatList, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { IChatItem } from "@/api/interfaces";
-import styles from ".././stylesheets/SocialScreenStyles";
-import { fakeMatches, fakePendings } from "@/api/fakedata";
+import BaseView from "../components/BaseView";
+import storage from "@/storage";
 
-const ChatItem = ({ item }: { item: IChatItem }) => (
-  <TouchableOpacity
-    style={styles.chatItem}
-    onPress={() => {
-      // Assuming you're using Expo Router or React Navigation
-      // Replace 'navigation.navigate' with the appropriate navigation method if different
-      //   navigation.navigate("chat", { userID: item.id });
-      router.push({
-        pathname: "/chat/[userID]",
-        params: { userID: item.id },
-      });
-    }}
-  >
-    <Image source={{ uri: item.avatar }} style={styles.avatar} />
-    <View style={styles.chatInfo}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.message}>{item.message}</Text>
-    </View>
-    <Text style={styles.time}>{item.time}</Text>
-  </TouchableOpacity>
-);
-const TabContent = ({ activeTab }: { activeTab: string }) => {
-  switch (activeTab) {
-    case "Matched":
-      return (
-        <FlatList
-          data={fakeMatches}
-          renderItem={({ item }) => <ChatItem item={item} />}
-        />
-      );
-    case "Pending":
-      return (
-        <FlatList
-          data={fakePendings}
-          renderItem={({ item }) => (
-            <View style={styles.pendingItem}>
-              <Image source={item.avatar} style={styles.avatar} />
-              <View style={styles.itemContent}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.status}>Pending</Text>
-              </View>
-              <Text style={styles.time}>{item.time}</Text>
-              <TouchableOpacity style={styles.closeButton}>
-                <Text style={styles.closeText}>x</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        />
-      );
-    case "Requests":
-      return <Text>Requests Content</Text>;
-    default:
-      return null;
-  }
-};
+type TabType = "matched" | "pending" | "requests";
 
-const RecentChatsScreen = () => {
-  const [activeTab, setActiveTab] = useState("Matched");
+export default function Social() {
+  const [activeTab, setActiveTab] = useState<TabType>("matched");
+  const [matchedUsers, setMatchedUsers] = useState<socialUser[]>([]);
+  const [requests, setRequests] = useState<socialUser[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<socialUser[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchMatchedUsers = async () => {
+    try {
+      setLoading(true);
+      const users = await api.buddymatches.getMatches();
+      const formattedUsers = users.map(user => ({
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        status: "matched",
+        profilePictureURL: user.profilePictureUrl,
+      }));
+      setMatchedUsers(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching matched users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const requestUsers = await api.buddymatches.getRequests();
+      const formattedUsers = requestUsers.map(user => ({
+        matchId: user.matchId,
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        status: "request",
+        profilePictureURL: user.profilePictureUrl,
+      }));
+      setRequests(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPending = async () => {
+    try {
+      setLoading(true);
+      const users = await api.buddymatches.getPending();
+      const formattedUsers = users.map(user => ({
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        status: "pending",
+        profilePictureURL: user.profilePictureUrl,
+      }));
+      setPendingUsers(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching pending users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchActiveTabData = () => {
+    if (activeTab === "matched") {
+      fetchMatchedUsers();
+    } else if (activeTab === "requests") {
+      fetchRequests();
+    } else if (activeTab === "pending") {
+      fetchPending();
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveTabData();
+  }, [activeTab]);
+
+  const handleAcceptRequest = async (buddyMatchId: number) => {
+    try {
+      await api.buddymatches.acceptRequest(buddyMatchId);
+      fetchMatchedUsers();
+      fetchRequests();
+    } catch (error) {
+      console.error("Error accepting request:", error);
+    }
+  };
+
+  const renderUserItem = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      className="flex-row items-center mx-4 my-2 p-3 bg-white rounded-xl shadow-sm border border-gray-100"
+      onPress={async () => {
+        if (activeTab === "matched") {
+          const { id } = await storage.getUser();
+          const chatRoomId = await api.chatRoom.getOrCreateRoomId({
+            user1Id: item.id,
+            user2Id: id,
+          });
+
+          console.log("Chat Room ID:", chatRoomId);
+
+          router.push({
+            pathname: "/chat/[userID]",
+            params: {
+              userID: item.id,
+              profilePictureURL: item.profilePictureURL,
+              name: item.name,
+              chatRoomId,
+            },
+          });
+        }
+      }}
+    >
+      <Image
+        source={
+          item.profilePictureURL
+            ? { uri: item.profilePictureURL }
+            : require("@/assets/portrait_placeholder.png")
+        }
+        className="w-14 h-14 rounded-full"
+      />
+      <View className="flex-1 ml-4">
+        <Text className="text-lg font-bold text-gray-800">{item.name}</Text>
+        <Text className="text-sm text-gray-500 capitalize">{item.status}</Text>
+      </View>
+      {activeTab === "requests" && (
+        <TouchableOpacity
+          className="bg-blue-500 px-5 py-2.5 rounded-lg shadow-sm"
+          onPress={() => handleAcceptRequest(item.matchId)}
+        >
+          <Text className="text-white font-semibold">Accept</Text>
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
+  );
+
+  const TabButton = ({ title, type }: { title: string; type: TabType }) => (
+    <TouchableOpacity
+      className={`flex-1 py-3 ${
+        activeTab === type ? "border-b-2 border-blue-500" : ""
+      }`}
+      onPress={() => setActiveTab(type)}
+    >
+      <Text
+        className={`text-center text-base ${
+          activeTab === type ? "text-blue-500 font-bold" : "text-gray-500"
+        }`}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Recent Chats</Text>
-        <TouchableOpacity>
-          <Ionicons name="search" size={24} color="black" />
-        </TouchableOpacity>
+    <BaseView edges={[]} className="flex-1">
+      <View className="flex-row bg-white border-b border-gray-200 mb-2">
+        <TabButton title="Matched" type="matched" />
+        <TabButton title="Pending" type="pending" />
+        <TabButton title="Requests" type="requests" />
       </View>
 
-      <View style={styles.tabs}>
-        {["Matched", "Pending", "Requests"].map((tab, index) => (
-          <TouchableOpacity
-            key={`tab-${index}`}
-            style={[styles.tab, activeTab === tab && styles.activeTab]}
-            onPress={() => setActiveTab(tab)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab && styles.activeTabText,
-              ]}
-            >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <TabContent activeTab={activeTab} />
-    </SafeAreaView>
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#3B82F6" />
+        </View>
+      ) : (
+        <FlatList
+          data={
+            activeTab === "matched"
+              ? matchedUsers
+              : activeTab === "requests"
+                ? requests
+                : activeTab === "pending"
+                  ? pendingUsers
+                  : []
+          }
+          renderItem={renderUserItem}
+          keyExtractor={item => item.id.toString()}
+          ListEmptyComponent={
+            <View className="flex-1 justify-center items-center mt-10">
+              <Text className="text-gray-500 text-lg">No users found</Text>
+            </View>
+          }
+        />
+      )}
+    </BaseView>
   );
-};
-
-export default RecentChatsScreen;
+}
