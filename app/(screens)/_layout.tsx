@@ -2,7 +2,7 @@ import { Tabs, usePathname } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, View, Text, Pressable } from "react-native";
-import { getTutorialContent } from "@/app/tutorials";
+import { getTutorialContent } from "@/tutorials";
 
 export default function TabLayout() {
   const [modalVisible, setModalVisible] = useState(false);
