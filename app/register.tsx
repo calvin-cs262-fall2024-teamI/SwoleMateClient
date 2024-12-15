@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Registration screen component for new user signup
+ */
+
 import React, { useState } from "react";
 import {
   Text,
@@ -22,6 +26,10 @@ import storage from "@/storage";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+/**
+ * RegisterScreen component that handles new user registration
+ * @returns JSX.Element
+ */
 const RegisterScreen = () => {
   const [form, setForm] = useState<RegisterRequest>({
     emailAddress: "",
@@ -50,11 +58,19 @@ const RegisterScreen = () => {
   const [pickerType, setPickerType] = useState<"gender" | "experienceLevel">();
   const [modalOptions, setModalOptions] = useState<string[]>([]);
 
+  /**
+   * Handles form field changes
+   * @param field - Form field to update
+   * @param value - New value for the field
+   */
   const handleChange = (field: keyof RegisterRequest, value: any) => {
     setForm({ ...form, [field]: value });
     setErrors({ ...errors, [field]: "" });
   };
 
+  /**
+   * Handles form submission and user registration
+   */
   const handleSubmit = async () => {
     const requiredFields = [
       "emailAddress",
@@ -102,12 +118,21 @@ const RegisterScreen = () => {
     }
   };
 
+  /**
+   * Opens modal for selecting options
+   * @param type - Type of picker to show
+   * @param options - Available options for selection
+   */
   const openModal = (type: "gender" | "experienceLevel", options: string[]) => {
     setPickerType(type);
     setModalOptions(options);
     setModalVisible(true);
   };
 
+  /**
+   * Handles selection in modal
+   * @param value - Selected value from modal
+   */
   const handleModalSelect = (value: string) => {
     if (pickerType === "gender") {
       setForm({ ...form, gender: value.toLowerCase() });

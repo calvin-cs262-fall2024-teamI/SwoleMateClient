@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Root layout component for the application
+ * Handles font loading, splash screen, and theme setup
+ */
+
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -7,8 +12,13 @@ import "../global.css";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useColorScheme } from "react-native";
 
+// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
+/**
+ * Root layout component that sets up the app's navigation structure
+ * and handles initial loading states
+ */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -16,6 +26,7 @@ export default function RootLayout() {
     SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
   });
 
+  // Hide splash screen once fonts are loaded
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();

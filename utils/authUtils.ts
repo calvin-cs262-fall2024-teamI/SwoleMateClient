@@ -1,8 +1,17 @@
+/**
+ * @fileoverview Authentication utility functions for token management
+ */
+
 import { AxiosRequestConfig, AxiosError } from "axios";
 import axiosInstance from "@/api/axios";
 import storage from "@/storage";
 import { api } from "@/api";
 
+/**
+ * Refreshes the authentication token
+ * @returns Promise containing new access token
+ * @throws Error if refresh token is missing or refresh fails
+ */
 export async function refreshToken(): Promise<string> {
   const refreshToken = await storage.getRefreshToken();
   if (!refreshToken) {
@@ -22,6 +31,12 @@ export async function refreshToken(): Promise<string> {
   return newAccessToken;
 }
 
+/**
+ * Retries a failed request with a new token
+ * @param originalRequest - Original axios request config
+ * @param newToken - New authentication token
+ * @returns Promise with request response
+ */
 export function retryRequestWithNewToken(
   originalRequest: AxiosRequestConfig,
   newToken: string

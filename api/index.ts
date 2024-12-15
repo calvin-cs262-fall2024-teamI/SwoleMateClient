@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Main API client implementation
+ */
+
 import { Alert } from "react-native";
 import axiosInstance from "./axios";
 import {
@@ -12,8 +16,16 @@ import {
 import storage from "@/storage";
 import { ExperienceLevel, Gender } from "./enums";
 
+/**
+ * API client object containing all API endpoints and methods
+ */
 export const api = {
   users: {
+    /**
+     * Get users with optional filters
+     * @param filters - Optional filters for user search
+     * @returns Promise containing array of users
+     */
     getUsers: async (
       filters?: Partial<{
         gender: string;
@@ -30,35 +42,73 @@ export const api = {
       return rsp.data.data as IUser[];
     },
 
+    /**
+     * Get a single user by ID
+     * @param id - User ID
+     * @returns Promise containing user data
+     */
     getUser: async (id: number) => {
       const rsp = await axiosInstance.get(`/users/${id}`);
       return rsp.data.data as IUser;
     },
 
+    /**
+     * Update a user's information
+     * @param id - User ID to update
+     * @param data - Partial user data to update
+     * @returns Promise containing updated user data
+     */
     updateUser: async (id: number, data: Partial<IUser>) => {
       return await axiosInstance.put<IUser>(`/users/${id}`, data);
     },
 
+    /**
+     * Create a new user
+     * @param data - User data without ID
+     * @returns Promise containing created user data
+     */
     createUser: async (data: Omit<IUser, "id">) => {
       return await axiosInstance.post<IUser>("/users", data);
     },
   },
 
   reviews: {
+    /**
+     * Get all reviews
+     * @returns Promise containing array of reviews
+     */
     getReviews: async () => {
       const rsp = await axiosInstance.get("/reviews");
       return rsp.data.data as IReview[];
     },
+
+    /**
+     * Get reviews for a specific user
+     * @param userId - ID of user to get reviews for
+     * @returns Promise containing array of reviews
+     */
     getReviewsFor: async (userId: number) => {
       const rsp = await axiosInstance.get(`/reviews?reviewedId=${userId}`);
       return rsp.data.data as IReview[];
     },
+
+    /**
+     * Create a new review
+     * @param data - Review data without ID
+     * @returns Promise containing created review data
+     */
     createReview: async (data: Omit<IReview, "id">) => {
       return await axiosInstance.post<IReview>("/reviews", data);
     },
   },
 
   auth: {
+    /**
+     * Login user with email and password
+     * @param emailAddress - User's email address
+     * @param password - User's password
+     * @returns Promise<boolean> indicating login success
+     */
     login: async (emailAddress: string, password: string) => {
       const rsp = await axiosInstance.post<LoginResponse>("/auth/login", {
         emailAddress,
@@ -77,6 +127,11 @@ export const api = {
       return false;
     },
 
+    /**
+     * Register a new user
+     * @param data - Registration data
+     * @returns Promise<boolean> indicating registration success
+     */
     register: async (data: RegisterRequest) => {
       try {
         const rsp = await axiosInstance.post("/auth/register", data);
@@ -102,17 +157,31 @@ export const api = {
       }
     },
 
+    /**
+     * Refresh authentication token
+     * @param token - Refresh token
+     * @returns Promise containing new access token
+     */
     refresh: async (token: string) => {
       return await axiosInstance.post("/auth/refresh", {
         refreshToken: token,
       });
     },
 
+    /**
+     * Logout current user
+     * @returns Promise indicating logout success
+     */
     logout: async () => {
       return await axiosInstance.post("/auth/logout");
     },
   },
   image: {
+    /**
+     * Upload a profile image
+     * @param profileImageForm - Form data containing image
+     * @returns Promise indicating upload success
+     */
     upload: async (profileImageForm: FormData) => {
       try {
         const { id } = await storage.getUser();
@@ -138,6 +207,10 @@ export const api = {
   },
 
   buddymatches: {
+    /**
+     * Get all accepted buddy matches for current user
+     * @returns Promise containing array of matched users
+     */
     getMatches: async () => {
       const { id } = await storage.getUser();
       const receivers = await axiosInstance.get(
@@ -164,6 +237,11 @@ export const api = {
 
       return users;
     },
+
+    /**
+     * Get pending buddy match requests sent by current user
+     * @returns Promise containing array of pending match users
+     */
     getPending: async () => {
       const { id } = await storage.getUser();
       const response = await axiosInstance.get(
@@ -185,6 +263,11 @@ export const api = {
 
       return users;
     },
+
+    /**
+     * Get pending buddy match requests received by current user
+     * @returns Promise containing array of requesting users
+     */
     getRequests: async () => {
       const { id } = await storage.getUser();
       const response = await axiosInstance.get(
@@ -206,6 +289,12 @@ export const api = {
 
       return users;
     },
+
+    /**
+     * Accept a buddy match request
+     * @param buddyMatchId - ID of buddy match to accept
+     * @returns Promise<boolean> indicating acceptance success
+     */
     acceptRequest: async (buddyMatchId: number) => {
       try {
         const myUser = await storage.getUser();
@@ -231,6 +320,12 @@ export const api = {
         console.log(error);
       }
     },
+
+    /**
+     * Send a buddy match request to another user
+     * @param receiverId - ID of user to send request to
+     * @returns Promise<boolean> indicating request success
+     */
     sendRequest: async (receiverId: number) => {
       try {
         const myUser = await storage.getUser();
@@ -257,6 +352,13 @@ export const api = {
     },
   },
   chatRoom: {
+    /**
+     * Get existing chat room ID or create new one for two users
+     * @param params - Object containing user IDs
+     * @param params.user1Id - First user's ID
+     * @param params.user2Id - Second user's ID
+     * @returns Promise containing chat room ID or false if failed
+     */
     getOrCreateRoomId: async ({
       user1Id,
       user2Id,
@@ -302,12 +404,25 @@ export const api = {
     },
   },
   messages: {
+    /**
+     * Get all messages from a chat room
+     * @param chatRoomId - ID of chat room to get messages from
+     * @returns Promise containing array of messages
+     */
     fromRoomId: async (chatRoomId: number) => {
       const response = await axiosInstance.get("/chatmessages", {
         params: { chatRoomId },
       });
       return response.data.data as IMessage[];
     },
+
+    /**
+     * Send a message in a chat room
+     * @param params - Object containing message details
+     * @param params.chatRoomId - ID of chat room to send message in
+     * @param params.messageText - Text content of message
+     * @returns Promise containing sent message data
+     */
     send: async ({
       chatRoomId,
       messageText,

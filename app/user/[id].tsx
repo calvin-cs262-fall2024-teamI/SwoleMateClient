@@ -1,3 +1,7 @@
+/**
+ * @fileoverview User profile view component for displaying other users' profiles
+ */
+
 import React from "react";
 import {
   View,
@@ -13,11 +17,19 @@ import BaseView from "@/app/components/BaseView";
 import { api } from "@/api";
 import { useState, useEffect } from "react";
 
+/**
+ * User profile component that displays detailed user information
+ * and interaction options
+ * @returns JSX.Element
+ */
 const UserProfile = () => {
   const { id, user } = useLocalSearchParams();
   const userObj = JSON.parse(user as string) as IUser;
   const [reviews, setReviews] = useState<IReview[]>([]);
 
+  /**
+   * Fetches reviews for the displayed user
+   */
   useEffect(() => {
     const fetchReviews = async () => {
       const reviewsData = await api.reviews.getReviewsFor(userObj.id);

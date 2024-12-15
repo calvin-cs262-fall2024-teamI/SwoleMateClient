@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Profile screen component for displaying and managing user profile
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -13,10 +17,17 @@ import { IUser } from "@/api/interfaces";
 import { Redirect, router } from "expo-router";
 import storage from "@/storage";
 
+/**
+ * Profile screen component that displays user information and profile management options
+ * @returns JSX.Element
+ */
 const Profile = () => {
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Fetches the user's profile data on component mount
+   */
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {

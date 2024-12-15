@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Social screen component for managing buddy connections and chat
+ */
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -13,8 +17,14 @@ import { router } from "expo-router";
 import BaseView from "../components/BaseView";
 import storage from "@/storage";
 
+/** Type representing the different tabs in the social screen */
 type TabType = "matched" | "pending" | "requests";
 
+/**
+ * Social screen component that displays matched users, pending requests, and incoming requests
+ * Allows users to accept buddy requests and initiate chats with matched users
+ * @returns JSX.Element
+ */
 export default function Social() {
   const [activeTab, setActiveTab] = useState<TabType>("matched");
   const [matchedUsers, setMatchedUsers] = useState<socialUser[]>([]);
@@ -22,6 +32,9 @@ export default function Social() {
   const [pendingUsers, setPendingUsers] = useState<socialUser[]>([]);
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Fetches and formats the list of matched buddy users
+   */
   const fetchMatchedUsers = async () => {
     try {
       setLoading(true);
@@ -40,6 +53,9 @@ export default function Social() {
     }
   };
 
+  /**
+   * Fetches and formats the list of incoming buddy requests
+   */
   const fetchRequests = async () => {
     try {
       setLoading(true);
@@ -59,6 +75,9 @@ export default function Social() {
     }
   };
 
+  /**
+   * Fetches and formats the list of pending buddy requests
+   */
   const fetchPending = async () => {
     try {
       setLoading(true);
@@ -77,6 +96,9 @@ export default function Social() {
     }
   };
 
+  /**
+   * Fetches data based on the currently active tab
+   */
   const fetchActiveTabData = () => {
     if (activeTab === "matched") {
       fetchMatchedUsers();
@@ -91,6 +113,10 @@ export default function Social() {
     fetchActiveTabData();
   }, [activeTab]);
 
+  /**
+   * Handles accepting a buddy request
+   * @param buddyMatchId - ID of the buddy match to accept
+   */
   const handleAcceptRequest = async (buddyMatchId: number) => {
     try {
       await api.buddymatches.acceptRequest(buddyMatchId);
@@ -101,6 +127,10 @@ export default function Social() {
     }
   };
 
+  /**
+   * Renders an individual user item in the list
+   * @param item - User data to display
+   */
   const renderUserItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       className="flex-row items-center mx-4 my-2 p-3 bg-white rounded-xl shadow-sm border border-gray-100"
@@ -149,6 +179,11 @@ export default function Social() {
     </TouchableOpacity>
   );
 
+  /**
+   * Renders a tab button for navigation
+   * @param title - Text to display in the tab
+   * @param type - Type of tab to render
+   */
   const TabButton = ({ title, type }: { title: string; type: TabType }) => (
     <TouchableOpacity
       className={`flex-1 py-3 ${
