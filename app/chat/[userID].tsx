@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Chat screen component for messaging between matched users
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -17,6 +21,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import { api } from "@/api";
 import { IMessage } from "@/api/interfaces";
 
+/**
+ * Renders an individual message in the chat
+ * @param props - Message props
+ * @param props.message - Message data to display
+ * @param props.hisId - ID of the other user to determine message alignment
+ */
 const MessageItem = ({
   message,
   hisId,
@@ -45,6 +55,10 @@ const MessageItem = ({
   </View>
 );
 
+/**
+ * Chat screen component that handles message display and sending
+ * @returns JSX.Element
+ */
 const Chat = () => {
   const params = useLocalSearchParams();
   const { userID, profilePictureURL, name, chatRoomId } = params;
@@ -55,6 +69,9 @@ const Chat = () => {
   const [refreshing, setRefreshing] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
+  /**
+   * Fetches chat messages from the API
+   */
   const fetchMessages = async () => {
     try {
       const messagesData = (await api.messages.fromRoomId(
@@ -90,6 +107,9 @@ const Chat = () => {
     };
   }, [chatRoomId]);
 
+  /**
+   * Handles sending a new message
+   */
   const handleSendMessage = async () => {
     if (newMessage.trim() === "") return;
 

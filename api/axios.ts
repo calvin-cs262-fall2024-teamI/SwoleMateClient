@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Axios instance configuration with interceptors for API requests
+ */
+
 import axios from "axios";
 import { AxiosError } from "axios";
 import storage from "@/storage/";
@@ -8,9 +12,13 @@ import {
   retryRequestWithNewToken,
   logApiError,
 } from "@/utils/authUtils";
-// const BASE_URL = "http://153.106.80.210:3000/api";
+
+/** Base URL for the API */
 const BASE_URL = "https://swolemate-service.azurewebsites.net/api";
 
+/**
+ * Configured axios instance with base URL and default settings
+ */
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 5000,
@@ -18,7 +26,10 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-//request interceptor
+
+/**
+ * Request interceptor to add authentication token to requests
+ */
 axiosInstance.interceptors.request.use(
   async config => {
     const token = await storage.getToken();
@@ -32,6 +43,10 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Response interceptor to handle API responses and token refresh
+ */
 axiosInstance.interceptors.response.use(
   response => {
     const apiResponse = response.data as BaseResponse;

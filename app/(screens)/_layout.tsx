@@ -1,9 +1,19 @@
+/**
+ * @fileoverview Tab layout component for the main application screens
+ * Handles navigation between Match, Social, and Profile screens
+ */
+
 import { Tabs, usePathname } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Modal, View, Text, Pressable } from "react-native";
 import { getTutorialContent } from "@/tutorials";
 
+/**
+ * TabLayout component that manages the bottom tab navigation
+ * and tutorial modal display for the main app screens
+ * @returns JSX.Element
+ */
 export default function TabLayout() {
   const [modalVisible, setModalVisible] = useState(false);
   const pathname = usePathname();

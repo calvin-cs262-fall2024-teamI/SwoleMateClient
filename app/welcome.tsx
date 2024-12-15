@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Welcome screen component with login functionality
+ */
+
 import { api } from "@/api";
 import BaseView from "@/app/components/BaseView";
 import { notImplemented } from "@/utils";
@@ -32,6 +36,10 @@ const slides = [
   },
 ];
 
+/**
+ * WelcomeScreen component that handles user login and registration navigation
+ * @returns JSX.Element
+ */
 const WelcomeScreen = () => {
   const [emailAddress, setEmailAddress] = useState("");
   const [emailValid, setEmailValid] = useState(false);
@@ -51,6 +59,9 @@ const WelcomeScreen = () => {
     return () => clearInterval(interval);
   }, [sliderIndex]);
 
+  /**
+   * Handles user login attempt
+   */
   const handleLogin = async () => {
     if (!emailValid) {
       Alert.alert("Invalid Email", "Please enter a valid email address");
@@ -76,7 +87,10 @@ const WelcomeScreen = () => {
     notImplemented();
   };
 
-  // Render individual slide with background image
+  /**
+   * Renders individual slide with background image
+   * @param item - Slide data to render
+   */
   const renderSlide = ({ item }: any) => {
     return (
       <ImageBackground source={item.image} className="w-full h-full">

@@ -1,5 +1,13 @@
+/**
+ * @fileoverview Type definitions for API responses and data models
+ */
+
 import { ExperienceLevel, Gender } from "./enums";
 
+/**
+ * Base response structure for API calls
+ * @template T - Type of data contained in the response
+ */
 export interface BaseResponse<T = any> {
   data: T | null;
   meta: object | null;
@@ -7,6 +15,9 @@ export interface BaseResponse<T = any> {
   success: boolean;
 }
 
+/**
+ * Response structure for login endpoint
+ */
 export interface LoginResponse extends BaseResponse {
   data: {
     id: number;
@@ -17,6 +28,9 @@ export interface LoginResponse extends BaseResponse {
   };
 }
 
+/**
+ * Represents a chat message
+ */
 export interface IMessage {
   id: number;
   chatRoomId: number;
@@ -24,6 +38,9 @@ export interface IMessage {
   messageText: string;
 }
 
+/**
+ * Represents a user profile
+ */
 export interface IUser {
   id: number;
   emailAddress: string;

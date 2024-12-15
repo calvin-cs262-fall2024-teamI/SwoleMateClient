@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Match screen component for finding and filtering potential workout partners
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -14,6 +18,10 @@ import { IUser } from "@/api/interfaces";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import storage from "@/storage";
 
+/**
+ * Match screen component that displays filterable list of potential workout partners
+ * @returns JSX.Element
+ */
 const Match = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<IUser[]>([]);
@@ -29,6 +37,9 @@ const Match = () => {
 
   const experienceLevels = ["beginner", "intermediate", "advanced"];
 
+  /**
+   * Fetches users from the API and filters out the current user
+   */
   useEffect(() => {
     const fetchUsers = async () => {
       const users = await api.users.getUsers();
@@ -42,6 +53,10 @@ const Match = () => {
     fetchUsers();
   }, []);
 
+  /**
+   * Applies all active filters to the user list
+   * @param searchText - Optional search query to filter by
+   */
   const applyFilters = (searchText: string = searchQuery) => {
     const filtered = users.filter(user => {
       const matchesSearch =
@@ -77,6 +92,10 @@ const Match = () => {
     applyFilters(text);
   };
 
+  /**
+   * Toggles an experience level filter
+   * @param level - Experience level to toggle
+   */
   const toggleExperienceLevel = (level: string) => {
     setSelectedExperience(prev => {
       const newSelection = prev.includes(level)
@@ -99,6 +118,10 @@ const Match = () => {
     applyFilters("");
   };
 
+  /**
+   * Renders a user card component
+   * @param item - User data to display
+   */
   const renderUserCard = ({ item }: { item: IUser }) => (
     <TouchableOpacity
       className="flex-row bg-mine p-4 rounded-xl mb-3 shadow-sm"

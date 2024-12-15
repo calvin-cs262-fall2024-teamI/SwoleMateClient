@@ -1,5 +1,13 @@
+/**
+ * @fileoverview Tutorial components for different app sections
+ */
+
 import { View, Text, ScrollView } from "react-native";
 
+/**
+ * Tutorial component for the Match screen
+ * @returns JSX.Element
+ */
 const MatchTutorial = () => (
   <>
     <Text className="text-xl font-bold mb-4">Match Page Tutorial</Text>
@@ -42,6 +50,10 @@ const MatchTutorial = () => (
   </>
 );
 
+/**
+ * Tutorial component for the Social screen
+ * @returns JSX.Element
+ */
 const SocialTutorial = () => (
   <>
     <Text className="text-xl font-bold mb-4">Social Page Tutorial</Text>
@@ -82,6 +94,10 @@ const SocialTutorial = () => (
   </>
 );
 
+/**
+ * Tutorial component for the Profile screen
+ * @returns JSX.Element
+ */
 const ProfileTutorial = () => (
   <>
     <Text className="text-xl font-bold mb-4">Profile Page Tutorial</Text>
@@ -121,6 +137,11 @@ const ProfileTutorial = () => (
   </>
 );
 
+/**
+ * Gets the appropriate tutorial content based on current route
+ * @param pathname - Current route pathname
+ * @returns JSX.Element
+ */
 export const getTutorialContent = (pathname: string) => {
   switch (pathname) {
     case "/match":

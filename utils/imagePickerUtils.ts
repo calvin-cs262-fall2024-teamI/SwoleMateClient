@@ -1,5 +1,14 @@
+/**
+ * @fileoverview Image picker utility functions
+ */
+
 import * as ImagePicker from "expo-image-picker";
 
+/**
+ * Handles image selection from device library
+ * @param setImageUri - Function to update image URI state
+ * @param setProfileImageForm - Function to update form data state
+ */
 export const handlePickImageAsync = async (
   setImageUri: React.Dispatch<React.SetStateAction<string | null>>,
   setProfileImageForm: React.Dispatch<React.SetStateAction<FormData | null>>

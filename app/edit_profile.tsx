@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Profile editing screen component
+ * Allows users to modify their profile information
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -28,6 +33,10 @@ const EXPERIENCE_LEVELS = [
   "expert",
 ] as const;
 
+/**
+ * EditProfile component for updating user profile information
+ * @returns JSX.Element
+ */
 const EditProfile = () => {
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +63,9 @@ const EditProfile = () => {
   } | null>(null);
   const [tempValue, setTempValue] = useState("");
 
+  /**
+   * Fetches current user profile data on component mount
+   */
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -86,6 +98,9 @@ const EditProfile = () => {
     fetchUserProfile();
   }, []);
 
+  /**
+   * Handles saving profile changes
+   */
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -111,6 +126,13 @@ const EditProfile = () => {
     }
   };
 
+  /**
+   * Opens the edit modal for a specific field
+   * @param key - Field key to edit
+   * @param label - Display label for the field
+   * @param type - Type of input to show
+   * @param options - Options for picker type inputs
+   */
   const handleEdit = (
     key: keyof typeof formData,
     label: string,
