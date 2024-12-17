@@ -110,7 +110,7 @@ const Match = () => {
   }, [ageRange, selectedExperience, showTrainersOnly, selectedGender]);
 
   const resetFilters = () => {
-    setAgeRange([0, 100]);
+    setAgeRange([18, 100]);
     setSelectedExperience([]);
     setShowTrainersOnly(false);
     setSelectedGender("all");
@@ -217,9 +217,9 @@ const Match = () => {
             <View className="items-center">
               <MultiSlider
                 values={[ageRange[0], ageRange[1]]}
-                min={0}
+                min={18}
                 max={100}
-                step={1}
+                step={5}
                 sliderLength={280}
                 onValuesChange={values => setAgeRange(values)}
                 allowOverlap={false}
